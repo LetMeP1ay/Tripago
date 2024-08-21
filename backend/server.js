@@ -58,6 +58,26 @@ app.get("/api/flights", async (req, res) => {
   }
 });
 
+app.get("/api/hotels", async (req, res) => {
+  try {
+    const token = await getAccessToken();
+    const { cityCode } = req.query;
+    const response = await amadeusApi.get(
+      "reference-data/locations/hotels/by-city",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          cityCode,
+        },
+      }
+    );
+    res.json(response.data);
+  } catch (e) {
+    res.json({ e: e.message });
+  }
+});
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
