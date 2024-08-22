@@ -62,7 +62,7 @@ app.get("/api/hotels", async (req, res) => {
   try {
     const token = await getAccessToken();
     const { cityCode } = req.query;
-    const response = await amadeusApi.get(
+    const response = await amadeusAuth.get(
       "reference-data/locations/hotels/by-city",
       {
         headers: {

@@ -7,15 +7,11 @@ export default function HotelSearch() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const searchHotels = async (
-    origin: string,
-    destination: string,
-    departureDate: string
-  ) => {
+  const searchHotels = async (cityCode: string) => {
     setLoading(true);
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/flights?origin=${origin}&destination=${destination}&departureDate=${departureDate}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/hotels?cityCode=${cityCode}`
       );
       const data = await res.json();
       setHotels(data.data);
@@ -28,18 +24,14 @@ export default function HotelSearch() {
 
   return (
     <div>
-      <h1>Search Flights</h1>
-      <button onClick={() => searchHotels("NYC", "LAX", "2024-09-10")}>
-        Search
-      </button>
+      <h1>Search Hotels</h1>
+      <button onClick={() => searchHotels("NYC")}>Search</button>
       {loading && <p>Loading...</p>}
       {error && <p>{error}</p>}
       <ul>
-        {hotels.map((flight: any) => (
-          <li key={flight.id}>
-            {flight.itineraries[0].segments[0].departure.iataCode} to{" "}
-            {flight.itineraries[0].segments[0].arrival.iataCode} - $
-            {flight.price.total}
+        {hotels.map((hotel: any, index: number) => (
+          <li key={index}>
+            {hotel.name} - {hotel.iataCode}, {hotel.address.countryCode}
           </li>
         ))}
       </ul>
