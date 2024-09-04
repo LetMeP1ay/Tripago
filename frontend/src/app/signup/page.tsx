@@ -97,7 +97,7 @@ const SignUp: React.FC = () => {
         {displayPassword && (
           <input
             type="password"
-            placeholder="Password"
+            placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="border border-gray-300 rounded-lg shadow-sm w-full px-3.5 py-2.5 mb-4"
