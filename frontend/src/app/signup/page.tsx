@@ -171,7 +171,6 @@ const SignUp: React.FC = () => {
           Sign up with Apple
         </button>
       </div>
-      {error && <p>{error}</p>}
     </div>
   );
 };
