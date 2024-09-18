@@ -101,6 +101,39 @@ app.get("/api/flights", async (req, res) => {
   }
 });
 
+app.get("/api/hotels", async (req, res) => {
+  try {
+    const token = await getAccessToken();
+
+    const {
+      cityCode,
+      checkInDate,
+      checkOutDate,
+      adults,
+      roomQuantity = 1,
+    } = req.query;
+
+    const params = {
+      cityCode,
+      checkInDate,
+      checkOutDate,
+      adults,
+      roomQuantity,
+    };
+
+    const response = await amadeusApiV2.get("/shopping/hotel-offers", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params,
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch hotel offers" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
