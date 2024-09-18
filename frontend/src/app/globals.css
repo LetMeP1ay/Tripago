@@ -30,4 +30,7 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none; /* Hides calendar icon in WebKit browsers */
+  }
 }
