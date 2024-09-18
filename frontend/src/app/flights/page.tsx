@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import axios from "axios";
+import SearchBar from "@/components/SearchBar";
+import FlightDetails from "@/components/FlightDetails";
 
 enum TripType {
   RoundTrip = "1",
@@ -10,10 +12,10 @@ enum TripType {
 }
 
 enum FlightClass {
-  Economy = "1",
-  PremiumEconomy = "2",
-  Business = "3",
-  First = "4",
+  Economy = "ECONOMY",
+  PremiumEconomy = "PREMIUM_ECONOMY",
+  Business = "BUSINESS",
+  First = "FIRST",
 }
 
 export default function FlightSearch() {
@@ -30,22 +32,20 @@ export default function FlightSearch() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     const queryParams: Record<string, any> = {
-      departure_id: origin,
-      arrival_id: destination,
-      departure_date: departureDate,
+      originLocationCode: origin,
+      destinationLocationCode: destination,
+      departureDate,
       adults,
-      flight_class: flightClass,
-      type: tripType,
+      travelClass: flightClass,
     };
+
     if (tripType === TripType.RoundTrip && returnDate) {
-      queryParams.return_date = returnDate;
+      queryParams.returnDate = returnDate;
     }
 
-    const endpoint =
-      tripType === TripType.OneWay
-        ? `${process.env.NEXT_PUBLIC_API_URL}/api/flights/one-way`
-        : `${process.env.NEXT_PUBLIC_API_URL}/api/flights/round-trip`;
+    const endpoint = `${process.env.NEXT_PUBLIC_API_URL}/api/flights`;
 
     try {
       const response = await axios.get(endpoint, { params: queryParams });
@@ -56,92 +56,118 @@ export default function FlightSearch() {
   };
 
   return (
-    <div className="flex w-screen h-screen bg-white text-black">
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Trip Type:</label>
-          <select
-            value={tripType}
-            onChange={(e) => setTripType(e.target.value as TripType)}
-          >
-            <option value={TripType.OneWay}>One-Way</option>
-            <option value={TripType.RoundTrip}>Round Trip</option>
-          </select>
-        </div>
-
-        <div>
-          <label>Origin Airport:</label>
-          <input
+    <div className={`flex flex-col bg-white p-4 text-black items-center justify-center font-inter ${results ? "h-auto w-auto" : "h-screen w-screen"}`}>
+      <div className="flex justify-between shadow-lg rounded-[32px] w-96 mb-14">
+        <button
+          onClick={() => setTripType(TripType.OneWay)}
+          className={`w-full px-4 py-1.5 rounded-[60px] transition-all duration-600 ease-in-out hover:bg-[#71D1FC] hover:text-[#FDE3DD] active:bg-[#5BBEEB] ${
+            tripType === TripType.OneWay
+              ? "bg-[#71D1FC] text-[#FDE3DD] shadow-lg"
+              : "text-[#B8B8B8]"
+          }`}
+        >
+          One way
+        </button>
+        <button
+          onClick={() => setTripType(TripType.RoundTrip)}
+          className={`w-full px-4 py-1.5 rounded-[60px] transition-all duration-300 ease-in-out hover:bg-[#71D1FC] hover:text-[#FDE3DD] active:bg-[#5BBEEB] ${
+            tripType === TripType.RoundTrip
+              ? "bg-[#71D1FC] text-[#FDE3DD] shadow-lg"
+              : "text-[#B8B8B8]"
+          }`}
+        >
+          Return
+        </button>
+        <button
+          onClick={() => setTripType(TripType.MultiCity)}
+          className={`w-full px-4 py-1.5 rounded-[60px] transition-all duration-300 ease-in-out hover:bg-[#71D1FC] hover:text-[#FDE3DD] active:bg-[#5BBEEB] ${
+            tripType === TripType.MultiCity
+              ? "bg-[#71D1FC] text-[#FDE3DD] shadow-lg"
+              : "text-[#B8B8B8]"
+          }`}
+        >
+          Multi-City
+        </button>
+      </div>
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col w-80 rounded-xl shadow-2xl pt-8 pb-8 p-4 mb-16"
+      >
+        <div className="pb-[31px]">
+          <SearchBar
             type="text"
             value={origin}
-            onChange={(e) => setOrigin(e.target.value)}
-            required
+            onChange={(value) => setOrigin(value)}
           />
         </div>
 
-        <div>
-          <label>Destination Airport:</label>
-          <input
+        <div className="pb-[31px]">
+          <SearchBar
             type="text"
+            label="To"
             value={destination}
-            onChange={(e) => setDestination(e.target.value)}
-            required
+            onChange={(value) => setDestination(value)}
           />
         </div>
 
-        <div>
-          <label>Departure Date:</label>
-          <input
+        <div className="pb-[31px]">
+          <SearchBar
             type="date"
+            label="Departure"
             value={departureDate}
-            onChange={(e) => setDepartureDate(e.target.value)}
-            required
+            onChange={(value) => setDepartureDate(value)}
           />
         </div>
 
         {tripType === TripType.RoundTrip && (
-          <div>
-            <label>Return Date:</label>
-            <input
+          <div className="pb-[31px]">
+            <SearchBar
               type="date"
+              label="Return"
               value={returnDate}
-              onChange={(e) => setReturnDate(e.target.value)}
-              required
+              onChange={(value) => setReturnDate(value)}
             />
           </div>
         )}
 
-        <div>
-          <label>Adults:</label>
-          <input
-            type="number"
-            value={adults}
-            onChange={(e) => setAdults(Number(e.target.value))}
-            min="1"
-            required
-          />
+        <div className="flex flex-row">
+          <div className="w-full mr-[4.5px]">
+            <SearchBar
+              type="count"
+              label="Traveler"
+              value={adults}
+              onChange={(value) => setAdults(Number(value))}
+            />
+          </div>
+
+          <div className="w-full ml-[4.5px] pb-[31px]">
+            <SearchBar
+              type="dropdown"
+              label="Class"
+              value={flightClass}
+              onChange={(value) => setFlightClass(value)}
+            />
+          </div>
         </div>
 
-        <div>
-          <label>Class:</label>
-          <select
-            value={flightClass}
-            onChange={(e) => setFlightClass(e.target.value as FlightClass)}
-          >
-            <option value={FlightClass.Economy}>Economy</option>
-            <option value={FlightClass.PremiumEconomy}>Premium Economy</option>
-            <option value={FlightClass.Business}>Business</option>
-            <option value={FlightClass.First}>First</option>
-          </select>
-        </div>
-
-        <button type="submit">Search Flights</button>
+        <button
+          type="submit"
+          className="rounded-lg bg-[#71D1FC] text-white text-sm font-medium py-2.5 transition-all duration-600 ease-in-out hover:bg-[#5BBEEB] active:bg-[#4DAED3]"
+        >
+          Search
+        </button>
       </form>
 
       {results && (
-        <div>
-          <h2>Flight Results:</h2>
-          <pre>{JSON.stringify(results, null, 2)}</pre>
+        <div className="w-full p-4 flex flex-col items-center justify-center">
+          {results?.data?.map((flight: any) => (
+            <FlightDetails
+              key={flight.id}
+              flight={flight}
+              carriers={results.dictionaries.carriers}
+              aircraft={results.dictionaries.aircraft}
+            />
+          ))}
         </div>
       )}
     </div>

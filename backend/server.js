@@ -61,22 +61,38 @@ app.get("/api/airport-suggestions", async (req, res) => {
   }
 });
 
-
 app.get("/api/flights", async (req, res) => {
   try {
     const token = await getAccessToken();
-    const { origin, destination, departureDate } = req.query;
+
+    const {
+      originLocationCode,
+      destinationLocationCode,
+      departureDate,
+      returnDate,
+      adults,
+      travelClass,
+      currencyCode = "USD",
+    } = req.query;
+
+    const params = {
+      originLocationCode,
+      destinationLocationCode,
+      departureDate,
+      adults,
+      travelClass,
+      currencyCode,
+    };
+
+    if (returnDate) {
+      params.returnDate = returnDate;
+    }
 
     const response = await amadeusApiV2.get("/shopping/flight-offers", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      params: {
-        originLocationCode: origin,
-        destinationLocationCode: destination,
-        departureDate,
-        adults: "1",
-      },
+      params,
     });
 
     res.json(response.data);
