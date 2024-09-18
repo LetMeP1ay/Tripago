@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaBell, FaTimes } from 'react-icons/fa';
+import { FaBell, FaTimes } from "react-icons/fa";
 
 const NotificationBell: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
