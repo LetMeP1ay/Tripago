@@ -106,22 +106,14 @@ app.get("/api/hotels", async (req, res) => {
     const token = await getAccessToken();
 
     const {
-      cityCode,
-      checkInDate,
-      checkOutDate,
-      adults,
-      roomQuantity = 1,
+      cityCode
     } = req.query;
 
     const params = {
-      cityCode,
-      checkInDate,
-      checkOutDate,
-      adults,
-      roomQuantity,
+      cityCode
     };
 
-    const response = await amadeusApiV2.get("/shopping/hotel-offers", {
+    const response = await amadeusApiV1.get("reference-data/locations/hotels/by-city", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
