@@ -56,8 +56,12 @@ export default function FlightSearch() {
   };
 
   return (
-    <div className={`flex flex-col bg-white p-4 text-black items-center justify-center font-inter ${results ? "h-auto w-auto" : "h-screen w-screen"}`}>
-      <div className="flex justify-between shadow-lg rounded-[32px] w-96 mb-14">
+    <div
+      className={`flex flex-col bg-white p-4 text-black items-center justify-center font-inter ${
+        results ? "h-auto w-auto" : "h-screen w-screen"
+      }`}
+    >
+      <div className="flex justify-between shadow-lg rounded-[32px] w-full md:w-96 mb-14">
         <button
           onClick={() => setTripType(TripType.OneWay)}
           className={`w-full px-4 py-1.5 rounded-[60px] transition-all duration-600 ease-in-out hover:bg-[#71D1FC] hover:text-[#FDE3DD] active:bg-[#5BBEEB] ${
