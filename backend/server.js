@@ -300,6 +300,49 @@ app.get("/api/hotel-offers", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch hotel offers" });
   }
+});
+
+āpp.get("/api/hotel-offers", async (req, res) => {
+  try {
+    const token = await getAccessToken();
+
+    const {
+      cityCode,
+      checkInDate,
+      checkOutDate,
+      adults,
+      roomQuantity,
+      hotelId,
+      currency = "USD",
+      includeClosed,
+      bestRateOnly,
+      priceRange,
+    } = req.query;
+
+    const params = {
+      cityCode,
+      checkInDate,
+      checkOutDate,
+      adults,
+      roomQuantity,
+      hotelId,
+      currency,
+      includeClosed,
+      bestRateOnly,
+      priceRange,
+    };
+
+    const response = await amadeusApiV2.get("shopping/hotel-offers", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params,
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch hotel offers" });
+  }
 }
 )
 app.listen(port, () => {
