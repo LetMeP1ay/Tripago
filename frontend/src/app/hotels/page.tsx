@@ -18,12 +18,12 @@ const HotelSearch = () => {
         },
       });
 
-      setResponseData(response.data); // Set the raw JSON response data
-      setError(""); // Clear any previous errors
+      setResponseData(response.data);
+      setError("");
     } catch (err) {
       console.error(err);
       setError("Failed to fetch hotel offers.");
-      setResponseData(null); // Clear previous data on error
+      setResponseData(null);
     }
   };
 
