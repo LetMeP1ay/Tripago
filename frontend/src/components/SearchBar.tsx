@@ -145,7 +145,7 @@ export default function SearchBar({
             />
             <span
               className="absolute text-xs mt-[20.5px]"
-              style={{ marginLeft: `${value.toString().length + 6 * 0.6}ch` }}
+              style={{ marginLeft: `${value.toString().length + 7 * 0.6}ch` }}
             >
               {value == 1 ? "Adult" : "Adults"}
             </span>
