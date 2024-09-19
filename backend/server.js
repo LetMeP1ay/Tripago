@@ -14,6 +14,64 @@ app.use(
   })
 );
 
+const getPlaceId = async (hotelName, lat, lng) => {
+  const textSeatchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?location=${lat},${lng}&query=${hotelName}&radius=10&key=${process.env.PLACES_API_KEY}`;
+
+  try {
+    const response = await axios.get(textSeatchUrl);
+    const placeId = response.data.results[0]?.place_id;
+
+    if (!placeId) {
+      throw new Error("Place ID not found.");
+    }
+    return placeId;
+  } catch (error) {
+    console.error("Error fetching Place ID:", error.message);
+    throw error;
+  }
+};
+
+const getPhotoReferences = async (placeId) => {
+  const placeDetailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${process.env.PLACES_API_KEY}`;
+
+  try {
+    const response = await axios.get(placeDetailsUrl);
+    const photos = response.data.result.photos || [];
+    const photoReferences = photos.map((photo) => photo.photo_reference);
+    return photoReferences;
+  } catch (error) {
+    console.error("Error fetching Place Details:", error.message);
+    throw error;
+  }
+};
+
+const getPhotoUrl = (photoReference, maxWidth = 400) => {
+  return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidth}&photoreference=${photoReference}&key=${process.env.PLACES_API_KEY}`;
+};
+
+app.get("/api/hotel-images", async (req, res) => {
+  const { hotelName, lat, lng } = req.query;
+
+  try {
+    const placeId = await getPlaceId(hotelName, lat, lng);
+
+    const photoReferences = await getPhotoReferences(placeId);
+
+    if (photoReferences.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No photos available for this hotel." });
+    }
+
+    const photoUrls = photoReferences.map((ref) => getPhotoUrl(ref));
+
+    res.json({ photos: photoUrls });
+  } catch (error) {
+    console.error("Error fetching hotel images:", error.message);
+    res.status(500).json({ error: "Failed to fetch hotel images." });
+  }
+});
+
 const amadeusAuth = axios.create({
   baseURL: "https://test.api.amadeus.com/v1",
   headers: {
