@@ -16,3 +16,23 @@ export default function PaymentSuccess({
       </main>
     );
   }
+
+   /* export default function PaymentSuccess({
+      searchParams,
+    }: {
+      searchParams: { amount?: string };
+    }) {
+      const amount = searchParams.amount;
+    
+      return (
+        <main className="max-w-6xl mx-auto p-10 text-white text-center border m-10 rounded-md bg-blue-500">
+          <div className="mb-10">
+            <h1 className="text-4xl font-extrabold mb-2">Thank you!</h1>
+            <h2 className="text-2xl">Payment Successful</h2>
+            <div className="bg-white p-2 rounded-md text-black mt-5 text-4xl font-bold">
+              {amount ? `$${amount}` : "Amount not provided"}
+            </div>
+          </div>
+        </main>
+      );
+    }*/
