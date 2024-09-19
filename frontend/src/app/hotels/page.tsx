@@ -83,6 +83,7 @@ export default function HotelBookings() {
   const [error, setError] = useState<string | null>(null);
   const [allHotelIds, setAllHotelIds] = useState<string[]>([]);
   const [currentBatch, setCurrentBatch] = useState<number>(0);
+  const [hotelImages, setHotelImages] = useState<Record<string, string[]>>({});
 
   const fetchHotelsByCity = async (): Promise<string[]> => {
     try {
@@ -127,10 +128,13 @@ export default function HotelBookings() {
       if (data.data && Array.isArray(data.data)) {
         setHotelOffers((prevOffers) => [...prevOffers, ...data.data]);
         setError(null);
+
         const availableHotelIds = data.data
           .filter((offer: HotelOffer) => offer.available)
           .map((offer: HotelOffer) => offer.hotel.hotelId);
+
         await fetchHotelRatingsInBatches(availableHotelIds);
+        await fetchImagesForHotels(data.data);
       } else {
         setError("No hotel offers found.");
       }
@@ -184,6 +188,24 @@ export default function HotelBookings() {
     }
   };
 
+  const fetchImagesForHotels = async (hotelOffers: HotelOffer[]) => {
+    try {
+      for (let offer of hotelOffers) {
+        const { name, latitude, longitude } = offer.hotel;
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/hotel-images?hotelName=${name}&lat=${latitude}&lng=${longitude}`
+        );
+        const data = await response.json();
+        setHotelImages((prevImages) => ({
+          ...prevImages,
+          [offer.hotel.hotelId]: data.photos || [],
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching hotel images:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchOffersInBatches = async () => {
       const hotelIds = await fetchHotelsByCity();
@@ -210,6 +232,21 @@ export default function HotelBookings() {
               <p>
                 Location: {offer.hotel.latitude}, {offer.hotel.longitude}
               </p>
+              {hotelImages[offer.hotel.hotelId] &&
+              hotelImages[offer.hotel.hotelId].length > 0 ? (
+                <div className="flex flex-wrap gap-4">
+                  {hotelImages[offer.hotel.hotelId].map((imageUrl, index) => (
+                    <img
+                      key={index}
+                      src={imageUrl}
+                      alt={`Hotel ${offer.hotel.name} image ${index + 1}`}
+                      className="w-48 h-32 object-cover"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p>No images available for this hotel.</p>
+              )}
 
               {offer.available && offer.offers ? (
                 offer.offers.map((singleOffer) => (
