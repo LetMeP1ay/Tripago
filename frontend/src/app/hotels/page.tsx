@@ -64,7 +64,7 @@ interface RatingWarning {
   };
 }
 
-const BATCH_SIZE = 20;
+const BATCH_SIZE = 6;
 const RATING_BATCH_SIZE = 3;
 
 export default function HotelBookings() {
@@ -222,7 +222,7 @@ export default function HotelBookings() {
   const gap = "15px";
   const dispNum = 3
   return (
-    <div className={`px-[${gap}] pb-[15px] flex-col justify-start items-center gap-[15px] inline-flex w-full h-screen bg-white text-black`}>
+    <div className={`px-[${gap}] pb-[15px] flex-col justify-start items-center gap-[15px] inline-flex w-screen ${hotelOffers.length > 0 ? "h-auto": "h-screen"} bg-white text-black`}>
       <div className="justify-between items-center inline-flex w-full">
           <p>Discover your perfect place to stay</p>
         <div className="px-[15px] py-2.5 bg-white rounded-[50px] border-2 border-black/10 items-center flex w-1/2">
@@ -245,6 +245,7 @@ export default function HotelBookings() {
           <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Mansion</p></div>
           <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Mansion</p></div>
       </div>
+      sdfsdfsdfdgsdfgfdsg
         <div className="w-[272px] h-[152px] relative rounded-[10px] overflow-y-hidden">
           <img className="w-[272px] h-[204px] left-0 top-[-13px] absolute" src="https://via.placeholder.com/272x204" />
           <div className="absolute justify-between items-end gap-[120px] inline-flex w-full px-[15px] py-[12px] h-full text-white">
@@ -252,11 +253,12 @@ export default function HotelBookings() {
               <p>NAME</p>
               <p>$PRICE</p>
             </div>
-            <div className="justify-right items-right flex text-right">
+            <div className="justify-left items-left flex text-left">
               <p>⭐RATING</p>
             </div>
           </div>
         </div>
+        dsjgvfsdfghvsdfghvgh
       <div className="justify-between items-center gap-3.5 inline-flex w-full">
         <div className="w-175 h-175 rounded-[15px] justify-end items-center flex overflow-y-hidden">
           <img className="w-[175] h-[175]" src="https://via.placeholder.com/175x175" />
@@ -270,81 +272,66 @@ export default function HotelBookings() {
           <p>⭐RATING</p>
         </div>
       </div>
+      hgdbfnkbmvjdhsbfnm gkhbjvhgcbx df
       {loading && <p>Loading...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
       {hotelOffers.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
           {hotelOffers.slice(0, 3).map((offer) => (
-            <div key={offer.hotel.hotelId} className="flex flex-col">
-              <h2 className="text-lg font-bold">{offer.hotel.name}</h2>
-              <p>Hotel ID: {offer.hotel.hotelId}</p>
-              <p>
-                Location: {offer.hotel.latitude}, {offer.hotel.longitude}
-              </p>
-
+            
+            <div key={offer.hotel.hotelId} className="w-[272px] h-[150px] relative overflow-y-hidden rounded-[10px]">
               {hotelImages[offer.hotel.hotelId] &&
               hotelImages[offer.hotel.hotelId].length > 0 ? (
                 <div className="flex flex-wrap gap-2">
+                  
+                  
+                  
                   {hotelImages[offer.hotel.hotelId].map((imageUrl, index) => (
                     <img
                       key={index}
                       src={imageUrl}
                       alt={`Hotel ${offer.hotel.name} image ${index + 1}`}
                       className={` ${
-                        index === 0 ? "w-32 h-24 object-cover" : "hidden"
+                        index === 0 ? "w-90 h-90 object-cover rounded-[10px]" : "hidden"
                       }`}
                     />
                   ))}
+                  <div className="absolute justify-between items-start flex flex-col w-full px-[15px] h-full text-white bg-black bg-opacity-50">
+                  <p className="text-xs font-light">{offer.hotel.name}</p>
+                  <div className="text-xs left-[14px] left-0 text-base font-light">
+                  
+                  {offer.available && offer.offers ? (
+                    offer.offers.map((singleOffer) => (
+                      <>
+                        <div
+                          key={singleOffer.id}
+                        >
+                          <p>
+                            Price: {singleOffer.price.total}{" "}
+                            {singleOffer.price.currency}
+                          </p>
+                        </div>
+                        <div className="justify-left items-left flex text-left">
+                          <h3 className="font-semibold">
+                            Rating: ⭐4.8
+                          </h3>
+                        </div>
+                      </>
+                    ))
+                  ) : (
+                    <p>No offers available for this hotel.</p>
+                  )}
+                  
+                </div>
+                  </div>
                 </div>
               ) : (
                 <p>No images available for this hotel.</p>
               )}
-
-              {offer.available && offer.offers ? (
-                offer.offers.map((singleOffer) => (
-                  <div
-                    key={singleOffer.id}
-                    className="mb-4 p-2 border border-gray-200"
-                  >
-                    <p>
-                      Room Type:{" "}
-                      {singleOffer.room.typeEstimated?.category || "N/A"}
-                    </p>
-                    <p>
-                      Description: {singleOffer.room.description?.text || "N/A"}
-                    </p>
-                    <p>
-                      Price: {singleOffer.price.total}{" "}
-                      {singleOffer.price.currency}
-                    </p>
-                    <p>Check-in Date: {singleOffer.checkInDate}</p>
-                    {singleOffer.checkOutDate && (
-                      <p>Check-out Date: {singleOffer.checkOutDate}</p>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <p>No offers available for this hotel.</p>
-              )}
-
-              {hotelRatings
-                .filter((rating) => rating.hotelId === offer.hotel.hotelId)
-                .map((rating) => (
-                  <div
-                    key={rating.hotelId}
-                    className="p-2 mt-2 border border-gray-200"
-                  >
-                    <h3 className="font-semibold">
-                      Rating: {rating.overallRating}%
-                    </h3>
-                    <p>Reviews: {rating.numberOfReviews}</p>
-                    <p>Service: {rating.sentiments.service}%</p>
-                    <p>Room Comfort: {rating.sentiments.roomComforts}%</p>
-                    <p>Location: {rating.sentiments.location}%</p>
-                    <p>Value for Money: {rating.sentiments.valueForMoney}%</p>
-                  </div>
-                ))}
+              
+                
+                
             </div>
           ))}
         </div>
@@ -352,52 +339,35 @@ export default function HotelBookings() {
 
       {hotelOffers.length > 3 &&
         hotelOffers.slice(3).map((offer) => (
-          <div key={offer.hotel.hotelId} className="flex flex-col mb-4">
-            <h2 className="text-lg font-bold">{offer.hotel.name}</h2>
-            <p>Hotel ID: {offer.hotel.hotelId}</p>
-            <p>
-              Location: {offer.hotel.latitude}, {offer.hotel.longitude}
-            </p>
-
+          <div key={offer.hotel.hotelId} className="justify-between items-center gap-3.5 inline-flex w-full">
+            
             {hotelImages[offer.hotel.hotelId] &&
             hotelImages[offer.hotel.hotelId].length > 0 ? (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex gap-2 w-[175px] h-[175px] relative overflow-y-hidden overflow-x-hidden rounded-[10px]">
                 {hotelImages[offer.hotel.hotelId].map((imageUrl, index) => (
                   <img
                     key={index}
                     src={imageUrl}
                     alt={`Hotel ${offer.hotel.name} image ${index + 1}`}
                     className={` ${
-                      index === 0 ? "w-32 h-24 object-cover" : "hidden"
+                      index === 0 ? "w-175 h-175 object-cover" : "hidden"
                     }`}
                   />
                 ))}
-              </div>
+                </div>
             ) : (
               <p>No images available for this hotel.</p>
             )}
-
+              <h2 className="text-lg font-bold items-center justify-center">{offer.hotel.name}</h2>
             {offer.available && offer.offers ? (
               offer.offers.map((singleOffer) => (
                 <div
                   key={singleOffer.id}
-                  className="mb-4 p-2 border border-gray-200"
                 >
-                  <p>
-                    Room Type:{" "}
-                    {singleOffer.room.typeEstimated?.category || "N/A"}
-                  </p>
-                  <p>
-                    Description: {singleOffer.room.description?.text || "N/A"}
-                  </p>
                   <p>
                     Price: {singleOffer.price.total}{" "}
                     {singleOffer.price.currency}
                   </p>
-                  <p>Check-in Date: {singleOffer.checkInDate}</p>
-                  {singleOffer.checkOutDate && (
-                    <p>Check-out Date: {singleOffer.checkOutDate}</p>
-                  )}
                 </div>
               ))
             ) : (
@@ -414,11 +384,6 @@ export default function HotelBookings() {
                   <h3 className="font-semibold">
                     Rating: {rating.overallRating}%
                   </h3>
-                  <p>Reviews: {rating.numberOfReviews}</p>
-                  <p>Service: {rating.sentiments.service}%</p>
-                  <p>Room Comfort: {rating.sentiments.roomComforts}%</p>
-                  <p>Location: {rating.sentiments.location}%</p>
-                  <p>Value for Money: {rating.sentiments.valueForMoney}%</p>
                 </div>
               ))}
           </div>
