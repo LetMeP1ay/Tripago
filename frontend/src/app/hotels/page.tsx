@@ -219,28 +219,81 @@ export default function HotelBookings() {
     fetchOffersInBatches();
   }, [cityCode, checkInDate, checkOutDate]);
 
+  const gap = "15px";
+  const dispNum = 3
   return (
-    <div className="flex flex-col p-4 border border-gray-300 w-full rounded-lg mb-4 shadow-lg max-w-[1200px]">
+    <div className={`px-[${gap}] pb-[15px] flex-col justify-start items-center gap-[15px] inline-flex w-full h-screen bg-white text-black`}>
+      <div className="justify-between items-center inline-flex w-full">
+          <p>Discover your perfect place to stay</p>
+        <div className="px-[15px] py-2.5 bg-white rounded-[50px] border-2 border-black/10 items-center flex w-1/2">
+          <div className="text-black/50 text-xs font-extrabold font-['Urbanist']">211B Baker Street</div>
+          <img className="w-[15px] h-2.5" src="https://via.placeholder.com/15x10" />
+        </div>
+      </div>
+      <div className="justify-between items-center inline-flex w-full gap-[15px]">
+        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
+          <p>Search Hotel</p>
+        </div>
+        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
+          <p>Open Map</p>
+        </div>
+      </div>
+        <div className="justify-between items-center inline-flex w-full gap-[15px]">
+          <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Hotel</p></div>
+          <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Apartments</p></div>
+          <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Condo</p></div>
+          <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Mansion</p></div>
+          <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Mansion</p></div>
+      </div>
+        <div className="w-[272px] h-[152px] relative rounded-[10px] overflow-y-hidden">
+          <img className="w-[272px] h-[204px] left-0 top-[-13px] absolute" src="https://via.placeholder.com/272x204" />
+          <div className="absolute justify-between items-end gap-[120px] inline-flex w-full px-[15px] py-[12px] h-full text-white">
+            <div className="left-[14px] left-0 text-base font-medium">
+              <p>NAME</p>
+              <p>$PRICE</p>
+            </div>
+            <div className="justify-right items-right flex text-right">
+              <p>⭐RATING</p>
+            </div>
+          </div>
+        </div>
+      <div className="justify-between items-center gap-3.5 inline-flex w-full">
+        <div className="w-175 h-175 rounded-[15px] justify-end items-center flex overflow-y-hidden">
+          <img className="w-[175] h-[175]" src="https://via.placeholder.com/175x175" />
+        </div>
+        <div className="relative items-start justify-start">
+          <p>NAME OF HOTEL</p>
+          <p>Location of hotel</p>
+        </div>
+        <div className="relative justify-end items-end">
+          <p>$PRICE</p>
+          <p>⭐RATING</p>
+        </div>
+      </div>
       {loading && <p>Loading...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      {hotelOffers.length > 0
-        ? hotelOffers.map((offer) => (
-            <div key={offer.hotel.hotelId} className="flex flex-col mb-4">
+      {hotelOffers.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+          {hotelOffers.slice(0, 3).map((offer) => (
+            <div key={offer.hotel.hotelId} className="flex flex-col">
               <h2 className="text-lg font-bold">{offer.hotel.name}</h2>
               <p>Hotel ID: {offer.hotel.hotelId}</p>
               <p>
                 Location: {offer.hotel.latitude}, {offer.hotel.longitude}
               </p>
+
               {hotelImages[offer.hotel.hotelId] &&
               hotelImages[offer.hotel.hotelId].length > 0 ? (
-                <div className="flex flex-wrap gap-4">
+                <div className="flex flex-wrap gap-2">
                   {hotelImages[offer.hotel.hotelId].map((imageUrl, index) => (
                     <img
                       key={index}
                       src={imageUrl}
                       alt={`Hotel ${offer.hotel.name} image ${index + 1}`}
-                      className="w-48 h-32 object-cover"
+                      className={` ${
+                        index === 0 ? "w-32 h-24 object-cover" : "hidden"
+                      }`}
                     />
                   ))}
                 </div>
@@ -293,8 +346,83 @@ export default function HotelBookings() {
                   </div>
                 ))}
             </div>
-          ))
-        : !loading && <p>No hotel offers found for the given criteria.</p>}
+          ))}
+        </div>
+      )}
+
+      {hotelOffers.length > 3 &&
+        hotelOffers.slice(3).map((offer) => (
+          <div key={offer.hotel.hotelId} className="flex flex-col mb-4">
+            <h2 className="text-lg font-bold">{offer.hotel.name}</h2>
+            <p>Hotel ID: {offer.hotel.hotelId}</p>
+            <p>
+              Location: {offer.hotel.latitude}, {offer.hotel.longitude}
+            </p>
+
+            {hotelImages[offer.hotel.hotelId] &&
+            hotelImages[offer.hotel.hotelId].length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {hotelImages[offer.hotel.hotelId].map((imageUrl, index) => (
+                  <img
+                    key={index}
+                    src={imageUrl}
+                    alt={`Hotel ${offer.hotel.name} image ${index + 1}`}
+                    className={` ${
+                      index === 0 ? "w-32 h-24 object-cover" : "hidden"
+                    }`}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p>No images available for this hotel.</p>
+            )}
+
+            {offer.available && offer.offers ? (
+              offer.offers.map((singleOffer) => (
+                <div
+                  key={singleOffer.id}
+                  className="mb-4 p-2 border border-gray-200"
+                >
+                  <p>
+                    Room Type:{" "}
+                    {singleOffer.room.typeEstimated?.category || "N/A"}
+                  </p>
+                  <p>
+                    Description: {singleOffer.room.description?.text || "N/A"}
+                  </p>
+                  <p>
+                    Price: {singleOffer.price.total}{" "}
+                    {singleOffer.price.currency}
+                  </p>
+                  <p>Check-in Date: {singleOffer.checkInDate}</p>
+                  {singleOffer.checkOutDate && (
+                    <p>Check-out Date: {singleOffer.checkOutDate}</p>
+                  )}
+                </div>
+              ))
+            ) : (
+              <p>No offers available for this hotel.</p>
+            )}
+
+            {hotelRatings
+              .filter((rating) => rating.hotelId === offer.hotel.hotelId)
+              .map((rating) => (
+                <div
+                  key={rating.hotelId}
+                  className="p-2 mt-2 border border-gray-200"
+                >
+                  <h3 className="font-semibold">
+                    Rating: {rating.overallRating}%
+                  </h3>
+                  <p>Reviews: {rating.numberOfReviews}</p>
+                  <p>Service: {rating.sentiments.service}%</p>
+                  <p>Room Comfort: {rating.sentiments.roomComforts}%</p>
+                  <p>Location: {rating.sentiments.location}%</p>
+                  <p>Value for Money: {rating.sentiments.valueForMoney}%</p>
+                </div>
+              ))}
+          </div>
+        ))}
 
       {currentBatch * BATCH_SIZE < allHotelIds.length && (
         <button
