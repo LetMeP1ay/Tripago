@@ -29,6 +29,10 @@ const amadeusApiV2 = axios.create({
   baseURL: "https://test.api.amadeus.com/v2",
 });
 
+const amadeusApiV3 = axios.create({
+  baseURL: "https://test.api.amadeus.com/v3",
+});
+
 const getAccessToken = async () => {
   const response = await amadeusAuth.post(
     "security/oauth2/token",
@@ -105,20 +109,21 @@ app.get("/api/hotels", async (req, res) => {
   try {
     const token = await getAccessToken();
 
-    const {
-      cityCode
-    } = req.query;
+    const { cityCode } = req.query;
 
     const params = {
-      cityCode
+      cityCode,
     };
 
-    const response = await amadeusApiV1.get("reference-data/locations/hotels/by-city", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      params,
-    });
+    const response = await amadeusApiV1.get(
+      "reference-data/locations/hotels/by-city",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params,
+      }
+    );
 
     res.json(response.data);
   } catch (error) {
@@ -126,49 +131,76 @@ app.get("/api/hotels", async (req, res) => {
   }
 });
 
-āpp.get("/api/hotel-offers", async (req, res) => {
+app.get("/api/hotel-offers", async (req, res) => {
   try {
     const token = await getAccessToken();
 
     const {
-      cityCode,
+      hotelIds,
+      adults,
       checkInDate,
       checkOutDate,
-      adults,
       roomQuantity,
-      hotelId,
-      currency = "USD",
-      includeClosed,
-      bestRateOnly,
       priceRange,
+      currency = "USD",
+      includeClosed = true,
+      bestRateOnly = true,
     } = req.query;
 
     const params = {
-      cityCode,
+      hotelIds,
+      adults,
       checkInDate,
       checkOutDate,
-      adults,
       roomQuantity,
-      hotelId,
+      priceRange,
       currency,
       includeClosed,
       bestRateOnly,
-      priceRange,
     };
 
-    const response = await amadeusApiV2.get("shopping/hotel-offers", {
+    const response = await amadeusApiV3.get("shopping/hotel-offers", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
       params,
     });
-
     res.json(response.data);
   } catch (error) {
+    console.error(
+      "Error fetching hotel offers:",
+      error.response?.data || error.message
+    );
     res.status(500).json({ error: "Failed to fetch hotel offers" });
   }
-}
-)
+});
+
+app.get("/api/hotel-ratings", async (req, res) => {
+  try {
+    const token = await getAccessToken();
+
+    const { hotelIds } = req.query;
+
+    const params = {
+      hotelIds,
+    };
+
+    const response = await amadeusApiV2.get("e-reputation/hotel-sentiments", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params,
+    });
+    res.json(response.data);
+  } catch (error) {
+    console.error(
+      "Error fetching hotel ratings:",
+      error.response?.data || error.message
+    );
+    res.status(500).json({ error: "Failed to fetch hotel ratings" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
