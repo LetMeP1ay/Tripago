@@ -8,8 +8,6 @@ interface HotelOffer {
   hotel: {
     type: string;
     hotelId: string;
-    chainCode: string;
-    dupeId?: string;
     name: string;
     cityCode: string;
     latitude: number;
@@ -20,13 +18,11 @@ interface HotelOffer {
     id: string;
     checkInDate: string;
     checkOutDate?: string;
-    rateCode: string;
-    rateFamilyEstimated: {
-      code: string;
-      type: string;
+    price: {
+      currency: string;
+      total: string;
     };
     room: {
-      type: string;
       typeEstimated: {
         category: string;
         beds: number;
@@ -34,44 +30,45 @@ interface HotelOffer {
       };
       description: {
         text: string;
-        lang: string;
       };
     };
-    guests: {
-      adults: number;
-    };
-    price: {
-      currency: string;
-      base: string;
-      total: string;
-      variations: {
-        average: {
-          base: string;
-        };
-        changes: Array<{
-          startDate: string;
-          endDate: string;
-          base: string;
-        }>;
-      };
-    };
-    policies: {
-      cancellations: Array<{
-        description: {
-          text: string;
-        };
-        type: string;
-      }>;
-      paymentType: string;
-    };
-    self: string;
   }>;
   self: string;
 }
 
+interface HotelRating {
+  hotelId: string;
+  overallRating: number;
+  numberOfReviews: number;
+  sentiments: {
+    staff: number;
+    location: number;
+    service: number;
+    roomComforts: number;
+    internet: number;
+    sleepQuality: number;
+    valueForMoney: number;
+    facilities: number;
+    catering: number;
+    pointsOfInterest: number;
+  };
+}
+
+interface RatingWarning {
+  code: number;
+  title: string;
+  detail: string;
+  source: {
+    parameter: string;
+    pointer: string;
+  };
+}
+
 const BATCH_SIZE = 20;
+const RATING_BATCH_SIZE = 3;
 
 export default function HotelBookings() {
+  const router = useRouter();
 
   const query = new URLSearchParams(window.location.search);
   const cityCode = query.get("cityCode") || "";
@@ -80,6 +77,8 @@ export default function HotelBookings() {
   const adults = query.get("adults") || "1";
 
   const [hotelOffers, setHotelOffers] = useState<HotelOffer[]>([]);
+  const [hotelRatings, setHotelRatings] = useState<HotelRating[]>([]);
+  const [ratingWarnings, setRatingWarnings] = useState<RatingWarning[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [allHotelIds, setAllHotelIds] = useState<string[]>([]);
@@ -124,11 +123,14 @@ export default function HotelBookings() {
         `${process.env.NEXT_PUBLIC_API_URL}/api/hotel-offers?${queryString}`
       );
       const data = await response.json();
-      console.log(data);
 
       if (data.data && Array.isArray(data.data)) {
         setHotelOffers((prevOffers) => [...prevOffers, ...data.data]);
         setError(null);
+        const availableHotelIds = data.data
+          .filter((offer: HotelOffer) => offer.available)
+          .map((offer: HotelOffer) => offer.hotel.hotelId);
+        await fetchHotelRatingsInBatches(availableHotelIds);
       } else {
         setError("No hotel offers found.");
       }
@@ -137,6 +139,38 @@ export default function HotelBookings() {
       setError("Failed to fetch hotel offers.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchHotelRatings = async (hotelIds: string[]) => {
+    if (hotelIds.length === 0) return;
+
+    try {
+      const hotelIdsParam = hotelIds.join(",");
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/hotel-ratings?hotelIds=${hotelIdsParam}`
+      );
+      const data = await response.json();
+
+      if (data.data && Array.isArray(data.data)) {
+        setHotelRatings((prevRatings) => [...prevRatings, ...data.data]);
+      }
+
+      if (data.warnings && Array.isArray(data.warnings)) {
+        setRatingWarnings((prevWarnings) => [
+          ...prevWarnings,
+          ...data.warnings,
+        ]);
+      }
+    } catch (error) {
+      console.error("Error fetching hotel ratings:", error);
+    }
+  };
+
+  const fetchHotelRatingsInBatches = async (hotelIds: string[]) => {
+    for (let i = 0; i < hotelIds.length; i += RATING_BATCH_SIZE) {
+      const batch = hotelIds.slice(i, i + RATING_BATCH_SIZE);
+      await fetchHotelRatings(batch);
     }
   };
 
@@ -149,6 +183,7 @@ export default function HotelBookings() {
       setCurrentBatch(currentBatch + 1);
     }
   };
+
   useEffect(() => {
     const fetchOffersInBatches = async () => {
       const hotelIds = await fetchHotelsByCity();
@@ -200,10 +235,26 @@ export default function HotelBookings() {
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500">
-                  No offers available for this hotel.
-                </p>
+                <p>No offers available for this hotel.</p>
               )}
+
+              {hotelRatings
+                .filter((rating) => rating.hotelId === offer.hotel.hotelId)
+                .map((rating) => (
+                  <div
+                    key={rating.hotelId}
+                    className="p-2 mt-2 border border-gray-200"
+                  >
+                    <h3 className="font-semibold">
+                      Rating: {rating.overallRating}%
+                    </h3>
+                    <p>Reviews: {rating.numberOfReviews}</p>
+                    <p>Service: {rating.sentiments.service}%</p>
+                    <p>Room Comfort: {rating.sentiments.roomComforts}%</p>
+                    <p>Location: {rating.sentiments.location}%</p>
+                    <p>Value for Money: {rating.sentiments.valueForMoney}%</p>
+                  </div>
+                ))}
             </div>
           ))
         : !loading && <p>No hotel offers found for the given criteria.</p>}
