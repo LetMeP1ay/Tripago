@@ -65,24 +65,23 @@ export default function Map() {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen relative">
       <TopBar />
-      <div className="relative flex-grow">
-        {/* Custom Search Bar */}
-        <div className="absolute top-6 left-0 right-0 z-10 px-4">
-          <div className="max-w-xl mx-auto">
-            <input
-              ref={inputRef}
-              type="text"
-              placeholder="Search for places"
-              className="w-full p-2 border rounded-lg shadow-md"
-            />
-          </div>
-        </div>
         {/* Map Container */}
-        <div className="absolute inset-0" ref={mapRef} />
+        <div
+          className="flex-grow h-full" ref={mapRef}
+          style={{ minHeight: "500px" }} // Set minimum height for visibility
+        />
+        <div className="flex justify-center flex-col flex-grow">
+        {/* Search Bar */}
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Search for places"
+          className="flex m-4 p-2 w-3/4 mx-auto border rounded-md text-black"
+        />
+        </div>
       </div>
-    </div>
   );
 }
 
