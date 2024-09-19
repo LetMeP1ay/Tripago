@@ -71,7 +71,7 @@ export const FlightDetails: React.FC<FlightDetailsProps> = ({
   const sameAirline = secondCarrierCode === firstCarrierCode;
 
   return (
-    <div className="flex flex-col p-4 border border-gray-300 w-full rounded-lg mb-4 shadow-lg max-w-[1200px]">
+    <div className="flex flex-col p-4 border border-gray-300 w-full rounded-lg mb-2 shadow-lg max-w-[1200px]">
       <div className="flex flex-col lg:flex-row justify-between items-center space-y-4 lg:space-y-0">
         <div className="flex flex-col text-sm font-semibold w-[140px] hidden lg:flex">
           <div className="flex items-center">

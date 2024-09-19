@@ -4,6 +4,7 @@ import { useState } from "react";
 import axios from "axios";
 import SearchBar from "@/components/SearchBar";
 import FlightDetails from "@/components/FlightDetails";
+import { useRouter } from "next/navigation";
 
 enum TripType {
   RoundTrip = "1",
@@ -29,6 +30,7 @@ export default function FlightSearch() {
     FlightClass.Economy
   );
   const [results, setResults] = useState<any>(null);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -53,6 +55,21 @@ export default function FlightSearch() {
     } catch (e) {
       console.error("Error fetching flight data:", e);
     }
+  };
+
+  const handleSelectTicket = (iataCode: string, arrivalDate: string) => {
+    const queryParams: Record<string, string> = {
+      cityCode: iataCode,
+      checkInDate: arrivalDate.split("T")[0],
+      adults: adults.toString(),
+    };
+
+    if (returnDate) {
+      queryParams.checkOutDate = returnDate;
+    }
+
+    const queryString = new URLSearchParams(queryParams).toString();
+    router.push(`/hotels?${queryString}`);
   };
 
   return (
@@ -163,14 +180,30 @@ export default function FlightSearch() {
       </form>
 
       {results && (
-        <div className="w-full p-4 flex flex-col items-center justify-center">
+        <div className="w-full lg:w-auto p-4 flex flex-col items-center justify-center">
           {results?.data?.map((flight: any) => (
-            <FlightDetails
-              key={flight.id}
-              flight={flight}
-              carriers={results.dictionaries.carriers}
-              aircraft={results.dictionaries.aircraft}
-            />
+            <div key={flight.id} className="w-full flex flex-col items-center">
+              <FlightDetails
+                flight={flight}
+                carriers={results.dictionaries.carriers}
+                aircraft={results.dictionaries.aircraft}
+              />
+              <button
+                className="rounded-lg bg-[#71D1FC] mb-8 w-full lg:w-1/6 p-3 text-sm font-medium text-white transition-all duration-600 ease-in-out hover:bg-[#5BBEEB] active:bg-[#4DAED3] ml-auto"
+                onClick={() =>
+                  handleSelectTicket(
+                    flight.itineraries[0].segments[
+                      flight.itineraries[0].segments.length - 1
+                    ].arrival.iataCode,
+                    flight.itineraries[0].segments[
+                      flight.itineraries[0].segments.length - 1
+                    ].arrival.at
+                  )
+                }
+              >
+                Select
+              </button>
+            </div>
           ))}
         </div>
       )}
