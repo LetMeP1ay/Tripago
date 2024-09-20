@@ -259,7 +259,7 @@ app.get("/api/hotel-ratings", async (req, res) => {
   }
 });
 
-āpp.get("/api/hotel-offers", async (req, res) => {
+app.get("/api/hotel-offers", async (req, res) => {
   try {
     const token = await getAccessToken();
 
