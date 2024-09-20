@@ -12,7 +12,7 @@ npm run backend
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## As we are currently in the implementation phase, the navigation is not finalized, so in order to move across the app, use those links:
+## As we are currently in the implementation phase, the navigation is not finalized, so in order to move across the app, use those links (for the hotels page, update the page on load as it currently crashes):
 
 ```bash
 localhost:3000/signup
