@@ -245,6 +245,7 @@ export default function HotelBookings() {
           <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Mansion</p></div>
           <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Mansion</p></div>
       </div>
+      {/*
       sdfsdfsdfdgsdfgfdsg
         <div className="w-[272px] h-[152px] relative rounded-[10px] overflow-y-hidden">
           <img className="w-[272px] h-[204px] left-0 top-[-13px] absolute" src="https://via.placeholder.com/272x204" />
@@ -272,7 +273,7 @@ export default function HotelBookings() {
           <p>⭐RATING</p>
         </div>
       </div>
-      hgdbfnkbmvjdhsbfnm gkhbjvhgcbx df
+      hgdbfnkbmvjdhsbfnm gkhbjvhgcbx df*/}
       {loading && <p>Loading...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
@@ -339,11 +340,11 @@ export default function HotelBookings() {
 
       {hotelOffers.length > 3 &&
         hotelOffers.slice(3).map((offer) => (
-          <div key={offer.hotel.hotelId} className="justify-between items-center gap-3.5 inline-flex w-full">
-            
+          <div key={offer.hotel.hotelId} className="justify-between items-center inline-flex w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-center w-full">
             {hotelImages[offer.hotel.hotelId] &&
             hotelImages[offer.hotel.hotelId].length > 0 ? (
-              //grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8 items-center
+              
               <div className="flex gap-2 w-[175px] h-[175px] relative overflow-y-hidden overflow-x-hidden rounded-[10px]">
                 {hotelImages[offer.hotel.hotelId].map((imageUrl, index) => (
                   <img
@@ -362,7 +363,7 @@ export default function HotelBookings() {
               <h2 className="text-lg font-bold items-center justify-center">{offer.hotel.name}</h2>
             {offer.available && offer.offers ? (
               offer.offers.map((singleOffer) => (
-                <div key={singleOffer.id} className="flex justify-end items-end text-end">
+                <div key={singleOffer.id} className="flex flex-col justify-center items-end text-end">
                   <p>
                     Price: {singleOffer.price.total}{" "}
                     {singleOffer.price.currency}
@@ -375,6 +376,7 @@ export default function HotelBookings() {
             ) : (
               <p>No offers available for this hotel.</p>
             )}
+            </div>
 
             {hotelRatings
               .filter((rating) => rating.hotelId === offer.hotel.hotelId)
