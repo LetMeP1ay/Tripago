@@ -1,4 +1,4 @@
-## Welcome to Tripago!
+# Welcome to Tripago!
 
 Your all-in-one travelling app. Tired of jumping between apps to book flight tickets, find accommodation, and choose restaurants? Tripago has you covered. Our app consolidates these features into a single, seamless experience to simplify your travel planning. 
 
@@ -24,7 +24,7 @@ localhost:3000/stripe
 For the majority of our pages, we are using external API services (Amadeus, Google, Stripe, etc.). In order for the pages to work you would need access keys. Please, create .env files
 for both frontend and backend and populate them with the following:
 
-# Backend .env:
+### Backend .env:
 
 ```
 PORT=4000
@@ -33,7 +33,7 @@ AMADEUS_API_SECRET=your amadeus secret
 PLACES_API_KEY=your google places api key
 ```
 
-# Frontend .env:
+### Frontend .env:
 
 ```
 NEXT_PUBLIC_API_URL=http://localhost:4000
