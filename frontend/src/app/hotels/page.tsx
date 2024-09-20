@@ -64,7 +64,7 @@ interface RatingWarning {
   };
 }
 
-const BATCH_SIZE = 6;
+const BATCH_SIZE = 15;
 const RATING_BATCH_SIZE = 3;
 
 export default function HotelBookings() {
@@ -220,11 +220,16 @@ export default function HotelBookings() {
   }, [cityCode, checkInDate, checkOutDate]);
 
   const gap = "15px";
+  const numFeatured = 3;
   const dispNum = 3
   return (
-    <div className={`px-[${gap}] pb-[15px] flex-col justify-start items-center gap-[15px] inline-flex w-screen ${hotelOffers.length > 0 ? "h-auto": "h-screen"} bg-white text-black`}>
+    <div className={`px-[${gap}] py-[15px] flex-col justify-start items-center gap-[15px] inline-flex w-screen ${hotelOffers.length > 0 ? "h-auto": "h-screen"} bg-white text-black`}>
       <div className="justify-between items-center inline-flex w-full">
-          <p>Discover your perfect place to stay</p>
+          <div>
+            <p>Discover your</p>
+            <p>perfect place to stay</p>
+          </div>
+          
         <div className="px-[15px] py-2.5 bg-white rounded-[50px] border-2 border-black/10 items-center flex w-1/2">
           <div className="text-black/50 text-xs font-extrabold font-['Urbanist']">211B Baker Street</div>
           <img className="w-[15px] h-2.5" src="https://via.placeholder.com/15x10" />
@@ -278,9 +283,10 @@ export default function HotelBookings() {
       {error && <p className="text-red-500">{error}</p>}
 
       {hotelOffers.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
-          {hotelOffers.slice(0, 3).map((offer) => (
+        <div className={`grid grid-cols-1 lg:grid-cols-${numFeatured} gap-4 mb-8`}>
+          {hotelOffers.slice(0, numFeatured).map((offer) => (
             //put the smaller cards in a div that is a 3 colom wide at large size and 1 wide when its thin
+            // make the image the size of its box, with a matching height to stop the overlapping with name
             <div key={offer.hotel.hotelId} className="w-[272px] h-[150px] relative overflow-y-hidden rounded-[10px]">
               {hotelImages[offer.hotel.hotelId] &&
               hotelImages[offer.hotel.hotelId].length > 0 ? (
@@ -339,20 +345,20 @@ export default function HotelBookings() {
       )}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
       {hotelOffers.length > 3 &&
-        hotelOffers.slice(3).map((offer) => (
-          <div key={offer.hotel.hotelId} className="justify-between items-center inline-flex w-full">
+        hotelOffers.slice(numFeatured).map((offer) => (
+          <div key={offer.hotel.hotelId} className="justify-between items-center flex flex-wrap w-full">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-center w-full">
             {hotelImages[offer.hotel.hotelId] &&
             hotelImages[offer.hotel.hotelId].length > 0 ? (
               
-              <div className="flex gap-2 w-[175px] h-[175px] relative overflow-y-hidden overflow-x-hidden rounded-[10px]">
+              <div className="flex gap-2  relative overflow-y-hidden overflow-x-hidden rounded-[10px] w-[90px] h-[90px] lg:w-[135px] lg:h-[135px]">
                 {hotelImages[offer.hotel.hotelId].map((imageUrl, index) => (
                   <img
                     key={index}
                     src={imageUrl}
                     alt={`Hotel ${offer.hotel.name} image ${index + 1}`}
                     className={` ${
-                      index === 0 ? "w-175 h-175 object-cover" : "hidden"
+                      index === 0 ? "w-90 h-90 w-135 h-135 object-cover" : "hidden"
                     }`}
                   />
                 ))}
