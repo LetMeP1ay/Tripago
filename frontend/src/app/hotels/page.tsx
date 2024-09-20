@@ -343,6 +343,7 @@ export default function HotelBookings() {
             
             {hotelImages[offer.hotel.hotelId] &&
             hotelImages[offer.hotel.hotelId].length > 0 ? (
+              //grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8 items-center
               <div className="flex gap-2 w-[175px] h-[175px] relative overflow-y-hidden overflow-x-hidden rounded-[10px]">
                 {hotelImages[offer.hotel.hotelId].map((imageUrl, index) => (
                   <img
@@ -361,12 +362,13 @@ export default function HotelBookings() {
               <h2 className="text-lg font-bold items-center justify-center">{offer.hotel.name}</h2>
             {offer.available && offer.offers ? (
               offer.offers.map((singleOffer) => (
-                <div
-                  key={singleOffer.id}
-                >
+                <div key={singleOffer.id} className="flex justify-end items-end text-end">
                   <p>
                     Price: {singleOffer.price.total}{" "}
                     {singleOffer.price.currency}
+                  </p>
+                  <p>
+                    Rating: ⭐4.8
                   </p>
                 </div>
               ))
