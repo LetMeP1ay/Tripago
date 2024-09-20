@@ -2,11 +2,11 @@ import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",  // Fixed double slash
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}", // Fixed double slash
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}", // Corrected wildcard placement
-    "./components/**/*.{js,ts,jsx,tsx,mdx}", // Added wildcard **
-    "./app/payment_success/**/*.{js,ts,jsx,tsx,mdx}", // Corrected wildcard placement
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",  
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}", 
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}", 
+    "./components/**/*.{js,ts,jsx,tsx,mdx}", 
+    "./app/payment_success/**/*.{js,ts,jsx,tsx,mdx}", 
   ],
   theme: {
     extend: {
