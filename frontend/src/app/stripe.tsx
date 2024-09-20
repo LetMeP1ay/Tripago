@@ -1,7 +1,7 @@
 'use client';
 
 import React from "react";
-import CheckoutPage from "@/../components/CheckoutPage";
+import CheckoutPage from "@/components/CheckoutPage";
 import convertToSubcurrency from "@/../lib/convertToSubcurrency";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
