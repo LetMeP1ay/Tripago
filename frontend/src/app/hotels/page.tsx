@@ -280,7 +280,7 @@ export default function HotelBookings() {
       {hotelOffers.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
           {hotelOffers.slice(0, 3).map((offer) => (
-            
+            //put the smaller cards in a div that is a 3 colom wide at large size and 1 wide when its thin
             <div key={offer.hotel.hotelId} className="w-[272px] h-[150px] relative overflow-y-hidden rounded-[10px]">
               {hotelImages[offer.hotel.hotelId] &&
               hotelImages[offer.hotel.hotelId].length > 0 ? (
@@ -337,7 +337,7 @@ export default function HotelBookings() {
           ))}
         </div>
       )}
-
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
       {hotelOffers.length > 3 &&
         hotelOffers.slice(3).map((offer) => (
           <div key={offer.hotel.hotelId} className="justify-between items-center inline-flex w-full">
@@ -360,7 +360,7 @@ export default function HotelBookings() {
             ) : (
               <p>No images available for this hotel.</p>
             )}
-              <h2 className="text-lg font-bold items-center justify-center">{offer.hotel.name}</h2>
+              <p className="font-normal items-center justify-center text-center">{offer.hotel.name}</p>
             {offer.available && offer.offers ? (
               offer.offers.map((singleOffer) => (
                 <div key={singleOffer.id} className="flex flex-col justify-center items-end text-end">
@@ -392,7 +392,7 @@ export default function HotelBookings() {
               ))}
           </div>
         ))}
-
+        </div>
       {currentBatch * BATCH_SIZE < allHotelIds.length && (
         <button
           onClick={fetchNextBatch}
