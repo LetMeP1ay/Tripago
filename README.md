@@ -1,4 +1,4 @@
-:earth_asia: # Tripago - Your All-in-One Travel App
+# :earth_asia: Tripago - Your All-in-One Travel App
 
 Your all-in-one travelling app. Tired of jumping between apps to book flight tickets, find accommodation, and choose restaurants? Tripago has you covered. Our app consolidates these features into a single, seamless experience to simplify your travel planning. 
 
