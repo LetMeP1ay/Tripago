@@ -1,6 +1,5 @@
 // UI integration: will be moved later
-// src/components/CurrencyConverter.tsx
-//Testing https://opencagedata.com/pricing for API key, its FREE
+// This is just a dummy component to test the service
 
 import React, { useState } from 'react';
 import { getUserCurrencyConversion } from '../services/currencyConversion';
