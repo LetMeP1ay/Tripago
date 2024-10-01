@@ -28,7 +28,7 @@ export default function NavButton({
   return (
     <button
       className={
-        `w-full flex items-center justify-center rounded-lg p-3.5 font-medium transition-all duration-600 ease-in-out ` +
+        `w-full flex items-center justify-center rounded-lg p-3.5 font-medium lg:text-2xl transition-all duration-600 ease-in-out ` +
         (isActive ? `text-white bg-[#71D1FC] hover:bg-[#5BBEEB] active:bg-[#5AAEEA]` : `text-[#727272] bg-[#DADADA] hover:bg-[#CCCCCC] active:bg-[#BBB]`)
       }
       onClick={handleClick}
