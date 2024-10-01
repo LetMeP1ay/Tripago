@@ -236,33 +236,52 @@ export default function HotelBookings() {
         </div>
 
         <div className="px-[15px] py-2.5 bg-white rounded-[50px] border-2 border-black/10 justify-between items-center flex w-1/2">
-          <input className="text-black/50 text-xs md:text-xl font-bold w-full outline-none" placeholder="211B Baker Street">
-          </input>
-          <Image alt="icon" src="Arrow.svg" height={15} width={15} />
+          <input
+            className="text-black/50 text-xs md:text-xl font-bold w-full outline-none"
+            placeholder="211B Baker Street"
+          />
+          <Image
+            alt="icon"
+            src="Arrow.svg"
+            height={0}
+            width={0}
+            className="h-3 w-3 md:h-5 md:w-5"
+          />
         </div>
       </div>
-      <div className="justify-between items-center inline-flex w-full gap-[15px]">
-        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
-          <p>Search Hotel</p>
+      <div className="flex w-full gap-[15px]">
+        <div className="w-1/2 h-10 bg-[#ebebeb] rounded-[50px] items-center gap-2.5 p-2.5 flex">
+          <Image
+            alt="icon"
+            src="Search.svg"
+            height={0}
+            width={0}
+            className="h-4 w-4 md:h-5 md:w-5"
+          />
+          <input
+            placeholder="Search hotel"
+            className="bg-[#ebebeb] outline-none w-full md:text-xl"
+          />
         </div>
-        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
-          <p>Open Map</p>
-        </div>
+
+        <button className="w-1/2 h-10 bg-[#ebebeb] hover:bg-[#DADADA] active:bg-[#CCCCCC] rounded-[50px] justify-center items-center gap-2.5 flex hover:" onClick={() => router.push("/")}>
+          <p className="w-full text-center opacity-50">Open Map</p>
+        </button>
       </div>
-      <div className="justify-between items-center inline-flex w-full gap-[15px]">
-        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
+      <div className="justify-between items-center flex w-full gap-[15px] text-xs md:text-lg">
+        <div className="w-full h-10 bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
           <p>Hotel</p>
         </div>
-        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
+        <div className="w-full h-10 bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
           <p>Apartments</p>
         </div>
-        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
+        <div className="w-full h-10 bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
           <p>Condo</p>
         </div>
-        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
+        <div className="w-full h-10 bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
           <p>Mansion</p>
         </div>
-        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
+        <div className="w-full h-10 bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
           <p>Mansion</p>
         </div>
       </div>
