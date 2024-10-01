@@ -399,7 +399,7 @@ export default function HotelBookings() {
           </div>
         ))}
         </div>
-      {currentBatch * BATCH_SIZE < allHotelIds.length && (
+      {currentBatch * BATCH_SIZE < allHotelIds?.length && (
         <button
           onClick={fetchNextBatch}
           className="bg-blue-500 text-white rounded-lg p-2 mt-4"
