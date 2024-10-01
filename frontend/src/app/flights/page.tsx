@@ -30,10 +30,24 @@ export default function FlightSearch() {
     FlightClass.Economy
   );
   const [results, setResults] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [sortBy, setSortBy] = useState<string | undefined>(undefined);
   const router = useRouter();
+
+  const formatDuration = (duration: string) => {
+    const hoursMatch = duration.match(/(\d+)H/);
+    const minutesMatch = duration.match(/(\d+)M/);
+
+    const hours = Number(hoursMatch ? hoursMatch[1] : 0);
+    const minutes = Number(minutesMatch ? minutesMatch[1] : 0);
+
+    return Number(hours * 60 + minutes);
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    setLoading(true);
 
     const queryParams: Record<string, any> = {
       originLocationCode: origin,
@@ -52,6 +66,7 @@ export default function FlightSearch() {
     try {
       const response = await axios.get(endpoint, { params: queryParams });
       setResults(response.data);
+      setLoading(false);
     } catch (e) {
       console.error("Error fetching flight data:", e);
     }
@@ -71,6 +86,25 @@ export default function FlightSearch() {
     const queryString = new URLSearchParams(queryParams).toString();
     router.push(`/hotels?${queryString}`);
   };
+
+  const sortedResults = results?.data
+    ? [...results.data].sort((a, b) => {
+        if (sortBy === "price") {
+          return parseFloat(a.price.total) - parseFloat(b.price.total);
+        } else if (sortBy === "departure") {
+          return (
+            new Date(a.itineraries[0].segments[0].departure.at).getTime() -
+            new Date(b.itineraries[0].segments[0].departure.at).getTime()
+          );
+        } else if (sortBy === "duration") {
+          return (
+            formatDuration(a.itineraries[0].duration) -
+            formatDuration(b.itineraries[0].duration)
+          );
+        }
+        return 0;
+      })
+    : [];
 
   return (
     <div
@@ -110,6 +144,7 @@ export default function FlightSearch() {
           Multi-City
         </button>
       </div>
+
       <form
         onSubmit={handleSubmit}
         className="flex flex-col w-80 rounded-xl shadow-2xl pt-8 pb-8 p-4 mb-16"
@@ -179,9 +214,23 @@ export default function FlightSearch() {
         </button>
       </form>
 
+      {loading && <p>Looking for tickets...</p>}
+
       {results && (
-        <div className="w-full lg:w-auto p-4 flex flex-col items-center justify-center">
-          {results?.data?.map((flight: any) => (
+        <div className="w-full lg:w-auto p-4 flex flex-col items-end justify-center">
+          <div className="flex justify-end mb-4">
+            <select
+              className="border p-2 rounded"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="price">Price</option>
+              <option value="departure">Earliest Departure</option>
+              <option value="duration">Duration</option>
+            </select>
+          </div>
+
+          {sortedResults?.map((flight: any) => (
             <div key={flight.id} className="w-full flex flex-col items-center">
               <FlightDetails
                 flight={flight}
