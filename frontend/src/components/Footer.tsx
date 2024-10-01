@@ -22,7 +22,7 @@ export default function Footer() {
 
   return (
     <footer>
-      <div className="p-4 px-8 flex justify-between items-center bg-white border-t-2">
+      <div className="fixed bottom-0 left-0 w-full p-4 px-8 flex justify-between items-center bg-white border-t-2">
         <Image
           src={"Map.svg"}
           alt="icon"
