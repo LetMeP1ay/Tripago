@@ -9,11 +9,13 @@ import {
   OAuthProvider,
 } from "firebase/auth";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const googleProvider = new GoogleAuthProvider();
   const facebookProvider = new FacebookAuthProvider();
@@ -23,7 +25,7 @@ const Login: React.FC = () => {
     event.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      alert("Login successful!");
+      router.push("/flights");
     } catch (error: any) {
       setError(error.message);
     }
@@ -32,7 +34,7 @@ const Login: React.FC = () => {
   const handleGoogle = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      alert("Sign in successful!");
+      router.push("/flights");
     } catch (e: any) {
       setError(e.message);
     }
@@ -41,7 +43,7 @@ const Login: React.FC = () => {
   const handleFacebook = async () => {
     try {
       await signInWithPopup(auth, facebookProvider);
-      alert("Sign in successful!");
+      router.push("/flights");
     } catch (e: any) {
       setError(e.message);
     }
@@ -50,7 +52,7 @@ const Login: React.FC = () => {
   const handleApple = async () => {
     try {
       await signInWithPopup(auth, appleProvider);
-      alert("Sign in successful!");
+      router.push("/flights");
     } catch (e: any) {
       setError(e.message);
     }
@@ -100,6 +102,13 @@ const Login: React.FC = () => {
           Sign In
         </button>
       </form>
+      {error && (
+        <p className="pt-4 text-red-500">
+          {error.match(/\(auth\/invalid-credential\)/)
+            ? "Invalid credentials provided. Please try again."
+            : "An unknown error occurred. Please try again."}
+        </p>
+      )}
       <div className="relative flex py-5 items-center w-[366px]">
         <div className="flex-grow border-t border-gray-200"></div>
         <span className="flex-shrink mx-2 text-sm text-gray-600">OR</span>
