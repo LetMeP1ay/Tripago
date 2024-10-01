@@ -9,6 +9,7 @@ import {
 import { auth } from "../../../firebase-config";
 import { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const SignUp: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -16,16 +17,23 @@ const SignUp: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [displayPassword, setDisplayPassword] = useState(false);
   const [displayEmail, setDisplayEmail] = useState(true);
+  const router = useRouter();
 
   const googleProvider = new GoogleAuthProvider();
   const facebookProvider = new FacebookAuthProvider();
   const appleProvider = new OAuthProvider("apple.com");
 
+  const firebaseErrorMessages: Record<string, string> = {
+    "auth/email-already-in-use": "This email is already in use.",
+    "auth/weak-password": "The password must be at least 6 characters long.",
+    "auth/invalid-email": "Please provide a valid email address.",
+  };
+
   const handleSignUp = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      alert("Sign up successful!");
+      router.push("/flights");
     } catch (e: any) {
       setError(e.message);
     }
@@ -34,7 +42,7 @@ const SignUp: React.FC = () => {
   const handleGoogle = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      alert("Sign up successful!");
+      router.push("/flights");
     } catch (e: any) {
       setError(e.message);
     }
@@ -43,7 +51,7 @@ const SignUp: React.FC = () => {
   const handleFacebook = async () => {
     try {
       await signInWithPopup(auth, facebookProvider);
-      alert("Sign up successful!");
+      router.push("/flights");
     } catch (e: any) {
       setError(e.message);
     }
@@ -52,7 +60,7 @@ const SignUp: React.FC = () => {
   const handleApple = async () => {
     try {
       await signInWithPopup(auth, appleProvider);
-      alert("Sign up successful!");
+      router.push("/flights");
     } catch (e: any) {
       setError(e.message);
     }
@@ -124,6 +132,12 @@ const SignUp: React.FC = () => {
           </button>
         )}
       </form>
+      {error && (
+        <p className="pt-4 text-red-500">
+          {firebaseErrorMessages[error.match(/\(([^)]+)\)/)?.[1] || ""] ||
+            "An unknown error occurred. Please try again."}
+        </p>
+      )}
       <div className="relative flex py-5 items-center w-[366px]">
         <div className="flex-grow border-t border-gray-200"></div>
         <span className="flex-shrink mx-2 text-sm text-gray-600">OR</span>
