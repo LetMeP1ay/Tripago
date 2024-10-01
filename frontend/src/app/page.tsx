@@ -2,7 +2,6 @@
 
 import React, { useEffect } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
-import TopBar from "./TopBar";
 
 export default function Map() {
   const mapRef = React.useRef<HTMLDivElement>(null);
@@ -66,7 +65,6 @@ export default function Map() {
 
   return (
     <div className="flex flex-col h-screen relative">
-      <TopBar />
       {/* Map Container */}
       <div
         className="flex-grow h-full"

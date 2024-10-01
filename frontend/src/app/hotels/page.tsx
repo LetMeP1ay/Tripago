@@ -211,7 +211,7 @@ export default function HotelBookings() {
       const hotelIds = await fetchHotelsByCity();
       setAllHotelIds(hotelIds);
       setCurrentBatch(0);
-      if (hotelIds.length > 0) {
+      if (hotelIds?.length > 0) {
         await fetchNextBatch();
       }
     };
@@ -223,7 +223,7 @@ export default function HotelBookings() {
   const numFeatured = 3;
   const dispNum = 3
   return (
-    <div className={`px-[${gap}] py-[15px] flex-col justify-start items-center gap-[15px] inline-flex w-screen ${hotelOffers.length > 0 ? "h-auto": "h-screen"} bg-white text-black`}>
+    <div className={`flex-col justify-start items-center gap-[15px] inline-flex w-full ${hotelOffers.length > 0 ? "h-auto": "h-full"} bg-white text-black`}>
       <div className="justify-between items-center inline-flex w-full">
           <div>
             <p>Discover your</p>
