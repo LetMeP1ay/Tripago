@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface HotelOffer {
   type: string;
@@ -221,18 +222,23 @@ export default function HotelBookings() {
 
   const gap = "15px";
   const numFeatured = 3;
-  const dispNum = 3
+  const dispNum = 3;
   return (
-    <div className={`flex-col justify-start items-center gap-[15px] inline-flex w-full ${hotelOffers.length > 0 ? "h-auto": "h-full"} bg-white text-black`}>
-      <div className="justify-between items-center inline-flex w-full">
-          <div>
-            <p>Discover your</p>
-            <p>perfect place to stay</p>
-          </div>
-          
-        <div className="px-[15px] py-2.5 bg-white rounded-[50px] border-2 border-black/10 items-center flex w-1/2">
-          <div className="text-black/50 text-xs font-extrabold font-['Urbanist']">211B Baker Street</div>
-          <img className="w-[15px] h-2.5" src="https://via.placeholder.com/15x10" />
+    <div
+      className={`flex-col justify-start items-center gap-[15px] inline-flex w-full ${
+        hotelOffers.length > 0 ? "h-auto" : "h-full"
+      } bg-white text-black`}
+    >
+      <div className="justify-between items-center inline-flex w-full md:text-xl">
+        <div>
+          <p className="opacity-50">Discover your</p>
+          <p className="font-bold">perfect place to stay</p>
+        </div>
+
+        <div className="px-[15px] py-2.5 bg-white rounded-[50px] border-2 border-black/10 justify-between items-center flex w-1/2">
+          <input className="text-black/50 text-xs md:text-xl font-bold w-full outline-none" placeholder="211B Baker Street">
+          </input>
+          <Image alt="icon" src="Arrow.svg" height={15} width={15} />
         </div>
       </div>
       <div className="justify-between items-center inline-flex w-full gap-[15px]">
@@ -243,12 +249,22 @@ export default function HotelBookings() {
           <p>Open Map</p>
         </div>
       </div>
-        <div className="justify-between items-center inline-flex w-full gap-[15px]">
-          <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Hotel</p></div>
-          <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Apartments</p></div>
-          <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Condo</p></div>
-          <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Mansion</p></div>
-          <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Mansion</p></div>
+      <div className="justify-between items-center inline-flex w-full gap-[15px]">
+        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
+          <p>Hotel</p>
+        </div>
+        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
+          <p>Apartments</p>
+        </div>
+        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
+          <p>Condo</p>
+        </div>
+        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
+          <p>Mansion</p>
+        </div>
+        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
+          <p>Mansion</p>
+        </div>
       </div>
       {/*
       sdfsdfsdfdgsdfgfdsg
@@ -283,122 +299,124 @@ export default function HotelBookings() {
       {error && <p className="text-red-500">{error}</p>}
 
       {hotelOffers.length > 0 && (
-        <div className={`grid grid-cols-1 lg:grid-cols-${numFeatured} gap-4 mb-8`}>
+        <div
+          className={`grid grid-cols-1 lg:grid-cols-${numFeatured} gap-4 mb-8`}
+        >
           {hotelOffers.slice(0, numFeatured).map((offer) => (
             //put the smaller cards in a div that is a 3 colom wide at large size and 1 wide when its thin
             // make the image the size of its box, with a matching height to stop the overlapping with name
-            <div key={offer.hotel.hotelId} className="w-[272px] h-[150px] relative overflow-y-hidden rounded-[10px]">
+            <div
+              key={offer.hotel.hotelId}
+              className="w-[272px] h-[150px] relative overflow-y-hidden rounded-[10px]"
+            >
               {hotelImages[offer.hotel.hotelId] &&
               hotelImages[offer.hotel.hotelId].length > 0 ? (
                 <div className="flex flex-wrap gap-2">
-                  
-                  
-                  
                   {hotelImages[offer.hotel.hotelId].map((imageUrl, index) => (
                     <img
                       key={index}
                       src={imageUrl}
                       alt={`Hotel ${offer.hotel.name} image ${index + 1}`}
                       className={` ${
-                        index === 0 ? "w-90 h-90 object-cover rounded-[10px]" : "hidden"
+                        index === 0
+                          ? "w-90 h-90 object-cover rounded-[10px]"
+                          : "hidden"
                       }`}
                     />
                   ))}
                   <div className="absolute justify-between items-start flex flex-col w-full px-[15px] h-full text-white bg-black bg-opacity-50">
-                  <p className="text-xs font-light">{offer.hotel.name}</p>
-                  <div className="text-xs left-[14px] left-0 text-base font-light">
-                  
-                  {offer.available && offer.offers ? (
-                    offer.offers.map((singleOffer) => (
-                      <>
-                        <div
-                          key={singleOffer.id}
-                        >
-                          <p>
-                            Price: {singleOffer.price.total}{" "}
-                            {singleOffer.price.currency}
-                          </p>
-                        </div>
-                        <div className="justify-left items-left flex text-left">
-                          <h3 className="font-semibold">
-                            Rating: ⭐4.8
-                          </h3>
-                        </div>
-                      </>
-                    ))
-                  ) : (
-                    <p>No offers available for this hotel.</p>
-                  )}
-                  
-                </div>
+                    <p className="text-xs font-light">{offer.hotel.name}</p>
+                    <div className="text-xs left-[14px] left-0 text-base font-light">
+                      {offer.available && offer.offers ? (
+                        offer.offers.map((singleOffer) => (
+                          <>
+                            <div key={singleOffer.id}>
+                              <p>
+                                Price: {singleOffer.price.total}{" "}
+                                {singleOffer.price.currency}
+                              </p>
+                            </div>
+                            <div className="justify-left items-left flex text-left">
+                              <h3 className="font-semibold">Rating: ⭐4.8</h3>
+                            </div>
+                          </>
+                        ))
+                      ) : (
+                        <p>No offers available for this hotel.</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               ) : (
                 <p>No images available for this hotel.</p>
               )}
-              
-                
-                
             </div>
           ))}
         </div>
       )}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
-      {hotelOffers.length > 3 &&
-        hotelOffers.slice(numFeatured).map((offer) => (
-          <div key={offer.hotel.hotelId} className="justify-between items-center flex flex-wrap w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-center w-full">
-            {hotelImages[offer.hotel.hotelId] &&
-            hotelImages[offer.hotel.hotelId].length > 0 ? (
-              
-              <div className="flex gap-2  relative overflow-y-hidden overflow-x-hidden rounded-[10px] w-[90px] h-[90px] lg:w-[135px] lg:h-[135px]">
-                {hotelImages[offer.hotel.hotelId].map((imageUrl, index) => (
-                  <img
-                    key={index}
-                    src={imageUrl}
-                    alt={`Hotel ${offer.hotel.name} image ${index + 1}`}
-                    className={` ${
-                      index === 0 ? "w-90 h-90 w-135 h-135 object-cover" : "hidden"
-                    }`}
-                  />
-                ))}
-                </div>
-            ) : (
-              <p>No images available for this hotel.</p>
-            )}
-              <p className="font-normal items-center justify-center text-center">{offer.hotel.name}</p>
-            {offer.available && offer.offers ? (
-              offer.offers.map((singleOffer) => (
-                <div key={singleOffer.id} className="flex flex-col justify-center items-end text-end">
-                  <p>
-                    Price: {singleOffer.price.total}{" "}
-                    {singleOffer.price.currency}
-                  </p>
-                  <p>
-                    Rating: ⭐4.8
-                  </p>
-                </div>
-              ))
-            ) : (
-              <p>No offers available for this hotel.</p>
-            )}
-            </div>
+        {hotelOffers.length > 3 &&
+          hotelOffers.slice(numFeatured).map((offer) => (
+            <div
+              key={offer.hotel.hotelId}
+              className="justify-between items-center flex flex-wrap w-full"
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-center w-full">
+                {hotelImages[offer.hotel.hotelId] &&
+                hotelImages[offer.hotel.hotelId].length > 0 ? (
+                  <div className="flex gap-2  relative overflow-y-hidden overflow-x-hidden rounded-[10px] w-[90px] h-[90px] lg:w-[135px] lg:h-[135px]">
+                    {hotelImages[offer.hotel.hotelId].map((imageUrl, index) => (
+                      <img
+                        key={index}
+                        src={imageUrl}
+                        alt={`Hotel ${offer.hotel.name} image ${index + 1}`}
+                        className={` ${
+                          index === 0
+                            ? "w-90 h-90 w-135 h-135 object-cover"
+                            : "hidden"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <p>No images available for this hotel.</p>
+                )}
+                <p className="font-normal items-center justify-center text-center">
+                  {offer.hotel.name}
+                </p>
+                {offer.available && offer.offers ? (
+                  offer.offers.map((singleOffer) => (
+                    <div
+                      key={singleOffer.id}
+                      className="flex flex-col justify-center items-end text-end"
+                    >
+                      <p>
+                        Price: {singleOffer.price.total}{" "}
+                        {singleOffer.price.currency}
+                      </p>
+                      <p>Rating: ⭐4.8</p>
+                    </div>
+                  ))
+                ) : (
+                  <p>No offers available for this hotel.</p>
+                )}
+              </div>
 
-            {hotelRatings
-              .filter((rating) => rating.hotelId === offer.hotel.hotelId)
-              .map((rating) => (
-                <div
-                  key={rating.hotelId}
-                  className="p-2 mt-2 border border-gray-200"
-                >
-                  <h3 className="font-semibold">
-                    Rating: {rating.overallRating}%
-                  </h3>
-                </div>
-              ))}
-          </div>
-        ))}
-        </div>
+              {hotelRatings
+                .filter((rating) => rating.hotelId === offer.hotel.hotelId)
+                .map((rating) => (
+                  <div
+                    key={rating.hotelId}
+                    className="p-2 mt-2 border border-gray-200"
+                  >
+                    <h3 className="font-semibold">
+                      Rating: {rating.overallRating}%
+                    </h3>
+                  </div>
+                ))}
+            </div>
+          ))}
+      </div>
       {currentBatch * BATCH_SIZE < allHotelIds?.length && (
         <button
           onClick={fetchNextBatch}
