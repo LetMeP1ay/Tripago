@@ -19,6 +19,8 @@ export default function Header() {
       setActiveButton("Food");
     } else if (pathname.includes("/hotels")) {
       setActiveButton("Hotels");
+    } else {
+      setActiveButton("");
     }
   }, [pathname]);
 
