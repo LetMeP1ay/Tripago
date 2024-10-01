@@ -264,7 +264,10 @@ export default function HotelBookings() {
           />
         </div>
 
-        <button className="w-1/2 h-10 bg-[#ebebeb] hover:bg-[#DADADA] active:bg-[#CCCCCC] rounded-[50px] justify-center items-center gap-2.5 flex hover:" onClick={() => router.push("/")}>
+        <button
+          className="transition-all duration-600 ease-in-out w-1/2 h-10 bg-[#ebebeb] hover:bg-[#DADADA] active:bg-[#CCCCCC] rounded-[50px] justify-center items-center gap-2.5 flex hover:"
+          onClick={() => router.push("/")}
+        >
           <p className="w-full text-center opacity-50">Open Map</p>
         </button>
       </div>
