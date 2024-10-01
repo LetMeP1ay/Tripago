@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Image from "next/image";
-import NotificationBell from "./NotificationBell";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,27 +21,10 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="Logo.svg" />
       </head>
-      <body className={inter.className}>
-        <header>
-          <nav className="p-4 text-[#727272] flex justify-between items-center">
-            <div>
-              <Image
-                src="Tripago.svg"
-                alt="Tripago Logo"
-                width={0}
-                height={0}
-                className="w-20 md:w-40"
-              />
-            </div>
-            <div>
-              <NotificationBell />
-            </div>
-          </nav>
-        </header>
-        <main className="p-6">{children}</main>
-        <footer className="p-4 bg-gray-800 text-white text-center">
-          <p>&copy; 2024 My Website</p>
-        </footer>
+      <body className={`${inter.className} flex flex-col min-h-screen`}>
+        <Header />
+        <main className="flex-grow p-6">{children}</main>
+        <Footer />
       </body>
     </html>
   );

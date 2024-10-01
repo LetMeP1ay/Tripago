@@ -109,7 +109,7 @@ export default function FlightSearch() {
   return (
     <div
       className={`flex flex-col bg-white p-4 text-black items-center justify-center font-inter ${
-        results ? "h-auto w-auto" : "h-screen w-screen"
+        results ? "h-auto w-auto" : "h-full w-full"
       }`}
     >
       <div className="flex justify-between shadow-lg rounded-[32px] w-full md:w-96 mb-14">
