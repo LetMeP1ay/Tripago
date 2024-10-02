@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import HotelButton from "@/components/HotelButton";
 
 interface HotelOffer {
   type: string;
@@ -271,52 +272,15 @@ export default function HotelBookings() {
           <p className="w-full text-center opacity-50">Open Map</p>
         </button>
       </div>
-      <div className="justify-between items-center flex w-full gap-[15px] text-xs md:text-lg">
-        <div className="w-full h-10 bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
-          <p>Hotel</p>
-        </div>
-        <div className="w-full h-10 bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
-          <p>Apartments</p>
-        </div>
-        <div className="w-full h-10 bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
-          <p>Condo</p>
-        </div>
-        <div className="w-full h-10 bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
-          <p>Mansion</p>
-        </div>
-        <div className="w-full h-10 bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
-          <p>Mansion</p>
+      <div className="justify-between items-center flex w-full gap-[15px] text-xs md:text-lg md:mt-12 overflow-x-scroll md:overflow-hidden scrollbar">
+        <div className="flex md:flex-col w-max md:w-1/4 h-full">
+          <HotelButton label="Hotel" isActive />
+          <HotelButton label="Apartments" isActive={false} />
+          <HotelButton label="Condo" isActive={false} />
+          <HotelButton label="Mansion" isActive={false} />
+          <HotelButton label="Homeless" isActive={false} />
         </div>
       </div>
-      {/*
-      sdfsdfsdfdgsdfgfdsg
-        <div className="w-[272px] h-[152px] relative rounded-[10px] overflow-y-hidden">
-          <img className="w-[272px] h-[204px] left-0 top-[-13px] absolute" src="https://via.placeholder.com/272x204" />
-          <div className="absolute justify-between items-end gap-[120px] inline-flex w-full px-[15px] py-[12px] h-full text-white">
-            <div className="left-[14px] left-0 text-base font-medium">
-              <p>NAME</p>
-              <p>$PRICE</p>
-            </div>
-            <div className="justify-left items-left flex text-left">
-              <p>⭐RATING</p>
-            </div>
-          </div>
-        </div>
-        dsjgvfsdfghvsdfghvgh
-      <div className="justify-between items-center gap-3.5 inline-flex w-full">
-        <div className="w-175 h-175 rounded-[15px] justify-end items-center flex overflow-y-hidden">
-          <img className="w-[175] h-[175]" src="https://via.placeholder.com/175x175" />
-        </div>
-        <div className="relative items-start justify-start">
-          <p>NAME OF HOTEL</p>
-          <p>Location of hotel</p>
-        </div>
-        <div className="relative justify-end items-end">
-          <p>$PRICE</p>
-          <p>⭐RATING</p>
-        </div>
-      </div>
-      hgdbfnkbmvjdhsbfnm gkhbjvhgcbx df*/}
       {loading && <p>Loading...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
