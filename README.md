@@ -85,6 +85,7 @@ STRIPE_SECRET_KEY= your stripe secret
 ```
 # 🚧 Features in Progress
 🍽️ Restaurant suggestions based on Google Places 
+🌐 💸 Geo Currency Conversion   
 
 # 📧 Contact
 Project Link: [https://github.com/your-username/tripago](https://github.com/LetMeP1ay/Tripago)
