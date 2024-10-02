@@ -57,8 +57,12 @@ Sign up to get your own API key:
 https://developers.amadeus.com/register 
 https://developers.amadeus.com/self-service/category/flights 
 https://developers.amadeus.com/self-service/category/hotels
+
 https://developers.google.com/maps/documentation/places/web-service
+
 https://firebase.google.com/products/auth 
+
+https://opencagedata.com/pricing
 ```bash
 PORT=4000
 AMADEUS_API_KEY= your amadeus key
@@ -78,11 +82,40 @@ NEXT_PUBLIC_APP_ID=your firebase app id
 ### Frontend .env:
 Sign up to get your own API key:
 https://dashboard.stripe.com/register 
-
 ```bash
 NEXT_PUBLIC_STRIPE_PUBLIC_KEY=your stripe public key
 STRIPE_SECRET_KEY= your stripe secret
 ```
+### GeoCurrency Conversion:
+Sign up to get your own API key:
+[Location] https://opencagedata.com/pricing
+[Currency Service Country Code] https://restcountries.com/
+[Exchange rate] https://www.exchangerate-api.com/ 
+
+```bash
+export async function getCountryFromCoordinates(lat: number, lon: number): Promise<string> {
+    const apiKey = 'YOUR_API_KEY'; // Replace with your API key
+    const response = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lon}&key=${apiKey}`);
+    const data = await response.json();
+    return data.results[0].components.country_code.toUpperCase();
+  }
+```
+```bash
+export async function getCurrencyFromCountry(countryCode: string): Promise<string> {
+    const response = await fetch(`https://restcountries.com/v3.1/alpha/${countryCode}`);
+    const data = await response.json();
+    return data[0].currencies[Object.keys(data[0].currencies)[0]].code;
+  }
+```
+```bash
+  export async function convertCurrency(amount: number, fromCurrency: string, toCurrency: string): Promise<number> {
+    const apiKey = 'YOUR_API_KEY'; // Replace with your currency conversion API key
+    const response = await fetch(`https://v6.exchangerate-api.com/v6/${apiKey}/pair/${fromCurrency}/${toCurrency}/${amount}`);
+    const data = await response.json();
+    return data.conversion_result;
+  }
+```
+
 # 🚧 Features in Progress
 ### 🍽️ Restaurant suggestions based on Google Places 
 ### 🌐 💸 Geo Currency Conversion   
