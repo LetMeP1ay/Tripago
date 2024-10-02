@@ -87,8 +87,8 @@ STRIPE_SECRET_KEY= your stripe secret
 🍽️ Restaurant suggestions based on Google Places 
 
 # 📧 Contact
-Project Link: https://github.com/your-username/tripago
-Email: your-email@example.com
+Project Link: [https://github.com/your-username/tripago](https://github.com/LetMeP1ay/Tripago)
+Email: qmr3767@autuni.ac.nz | yfp1726@autuni.ac.nz
 
 # 📄 License
 This project is licensed under the MIT License. See the LICENSE file for details.
