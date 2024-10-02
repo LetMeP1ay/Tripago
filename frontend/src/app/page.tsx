@@ -106,28 +106,35 @@ export default function Map() {
       <div
         className="flex-grow h-full"
         ref={mapRef}
-        style={{ minHeight: "500px" }}
-      />
+        style={{ minHeight: "500px" }}/>
       <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-10 w-3/4 sm:w-1/2 lg:w-1/3">
         {/* Search Bar */}
         <input
           ref={inputRef}
           type="text"
           placeholder="Search for places"
-          className="w-full p-3 rounded-lg shadow-md border border-gray-300 focus:outline-none text-black"
-        />
+          className="w-full p-3 rounded-lg shadow-md border border-gray-300 focus:outline-none text-black"/>
       </div>
-      {/* Filter Dropdown */}
-      <div className="absolute top-28 left-1/2 transform -translate-x-1/2 z-10 w-3/4 sm:w-1/2 lg:w-1/3 flex justify-center mt-4 text-black">
-        <select
-          value={selectedFilter}
-          onChange={(e) => setSelectedFilter(e.target.value)}
-          className="w-full p-3 rounded-lg shadow-md border border-gray-300 focus:outline-none"
-        >
-          <option value="default">Default</option>
-          <option value="restaurant">Restaurants</option>
-          <option value="lodging">Hotels</option>
-        </select>
+      {/* Filter Buttons */}
+      <div className="absolute top-32 left-1/2 transform -translate-x-1/2 z-10 w-3/4 sm:w-1/2 lg:w-1/3 flex justify-center mt-4">
+        <button
+          onClick={() => setSelectedFilter("default")}
+          className={`grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex mx-1 ${
+            selectedFilter === "default" ? "bg-blue-500 text-white" : "text-black"}`}>
+          Default
+        </button>
+        <button
+          onClick={() => setSelectedFilter("restaurant")}
+          className={`grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex mx-1 ${
+            selectedFilter === "restaurant" ? "bg-blue-500 text-white" : "text-black"}`}>
+          Restaurants
+        </button>
+        <button
+          onClick={() => setSelectedFilter("lodging")}
+          className={`grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex mx-1 ${
+            selectedFilter === "lodging" ? "bg-blue-500 text-white" : "text-black"}`}>
+          Hotels
+        </button>
       </div>
     </div>
   );
