@@ -83,13 +83,18 @@ https://dashboard.stripe.com/register
 NEXT_PUBLIC_STRIPE_PUBLIC_KEY=your stripe public key
 STRIPE_SECRET_KEY= your stripe secret
 ```
-# 🚧 Features in Progress
-🍽️ Restaurant suggestions based on Google Places 
-🌐 💸 Geo Currency Conversion   
+### 🚧 Features in Progress
+# 🍽️ Restaurant suggestions based on Google Places 
+# 🌐 💸 Geo Currency Conversion   
+# :rotating_light: Real time notifications [Booking confirmations]
+# 🖼️ More appealing photos for Restaurants and Hotels
+# ⭐ Restaurant ratings
+# 🪄 Keyword filter searching for Restaurants
+
 
 # 📧 Contact
-Project Link: [https://github.com/your-username/tripago](https://github.com/LetMeP1ay/Tripago)
-Email: qmr3767@autuni.ac.nz | yfp1726@autuni.ac.nz
+# Project Link: [https://github.com/your-username/tripago](https://github.com/LetMeP1ay/Tripago)
+# Email: qmr3767@autuni.ac.nz (Vadim)| yfp1726@autuni.ac.nz (Andrew)
 
 # 📄 License
 This project is licensed under the MIT License. See the LICENSE file for details.
