@@ -8,8 +8,8 @@ Note: This project is currently in the implementation phase. Key features are be
 Follow these instructions to set up Tripago on your local machine for development and testing purposes.
 
 # Prerequisites
-Node.js: Download and install from Node.js Official Site.
-npm: Typically comes with Node.js. Verify installation with npm -v.
+ - Node.js: Download and install from Node.js Official Site.
+ - npm: Typically comes with Node.js. Verify installation with npm -v.
 
 # Installation
 1. Clone the repository: git clone https://github.com/your-username/tripago.git
