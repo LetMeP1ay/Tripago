@@ -15,3 +15,15 @@ export async function getUserCurrencyConversion(amount: number, toCurrency: stri
     throw error;
   }
 }
+
+
+export async function getUserHomeCurrency(): Promise<string> {
+  try {
+    const position = await getUserLocation();
+    const country = await getCountryFromCoordinates(position.coords.latitude, position.coords.longitude);
+    const userCurrency = await getCurrencyFromCountry(country);
+    return userCurrency;
+  } catch (error) {
+    throw error;
+  }
+}

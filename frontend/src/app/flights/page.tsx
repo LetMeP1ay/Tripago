@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import SearchBar from "@/components/SearchBar";
 import FlightDetails from "@/components/FlightDetails";
 import { useRouter } from "next/navigation";
+import {getUserHomeCurrency} from "../../services/currencyConversion";
+import {getUserCurrencyConversion} from "../../services/currencyConversion";
+import CurrencyDropdown from "@/components/CurrencyDropdown";
 
 enum TripType {
   RoundTrip = "1",
@@ -26,11 +29,23 @@ export default function FlightSearch() {
   const [departureDate, setDepartureDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [adults, setAdults] = useState(1);
+  const [currencyCode, setCurrencyCode] = useState<string>("NZD");
   const [flightClass, setFlightClass] = useState<FlightClass>(
     FlightClass.Economy
   );
   const [results, setResults] = useState<any>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const getCurrency = async () => {
+      try {
+        const homeCurrency = await getUserHomeCurrency();
+        setCurrencyCode(homeCurrency);
+      } catch(e) {
+        console.error("Failed to fetch home currency", e);
+      }
+    }
+  })
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -41,6 +56,7 @@ export default function FlightSearch() {
       departureDate,
       adults,
       travelClass: flightClass,
+      currencyCode,
     };
 
     if (tripType === TripType.RoundTrip && returnDate) {
@@ -177,6 +193,7 @@ export default function FlightSearch() {
         >
           Search
         </button>
+        <CurrencyDropdown selectedCurrency={currencyCode} onCurrencyChange={setCurrencyCode}/>
       </form>
 
       {results && (

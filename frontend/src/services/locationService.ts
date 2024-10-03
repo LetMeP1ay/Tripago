@@ -11,7 +11,7 @@ export function getUserLocation(): Promise<GeolocationPosition> {
   }
   
   export async function getCountryFromCoordinates(lat: number, lon: number): Promise<string> {
-    const apiKey = '.env.COUNTRY_API_KEY'; // Replace with your API key
+    const apiKey = `${process.env.NEXT_PUBLIC_COUNTRY_API_KEY}`; // Replace with your API key
     const response = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lon}&key=${apiKey}`);
     const data = await response.json();
     return data.results[0].components.country_code.toUpperCase();

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import AirlineLogo from "./AirlineLogo";
 
 interface FlightSegment {
@@ -69,6 +69,8 @@ export const FlightDetails: React.FC<FlightDetailsProps> = ({
       : null;
 
   const sameAirline = secondCarrierCode === firstCarrierCode;
+
+
 
   return (
     <div className="flex flex-col p-4 border border-gray-300 w-full rounded-lg mb-2 shadow-lg max-w-[1200px]">
