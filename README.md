@@ -28,21 +28,21 @@ npm: Typically comes with Node.js. Verify installation with npm -v.
 # :link: Navigation (Temporary)
 As the navigation is still in development, use these direct links to access the respective pages:
 ```bash
-Signup: http://localhost:3000/signup
-Login: http://localhost:3000/login
-Flights: http://localhost:3000/flights -> navigates into localhost:3000/hotels with specific data passed in the link
-Hotels: Redirected from Flights (please refresh if the page crashes)
-Stripe Payment: http://localhost:3000/stripe
+ 1. Signup: http://localhost:3000/signup
+ 2. Login: http://localhost:3000/login
+ 3. Flights: http://localhost:3000/flights -> navigates into localhost:3000/hotels with specific data passed in the link
+ 4. Hotels: Redirected from Flights (please refresh if the page crashes)
+ 5. Stripe Payment: http://localhost:3000/stripe
 ```
 # :hammer_and_wrench: Built With
-Next.js - Frontend framework for React-based apps.
-Node.js - Backend runtime for JavaScript.
-Express - Web framework for Node.js.
-Firebase - Backend services for authentication and data storage.
-Tailwind CSS - Utility-first CSS framework for styling.
-Amadeus API - For flight and hotel booking data.
-Google Places API - For retrieving restaurant and hotel information.
-Stripe API - For payment processing.
+ - Next.js - Frontend framework for React-based apps.
+ - Node.js - Backend runtime for JavaScript.
+ - Express - Web framework for Node.js.
+ - Firebase - Backend services for authentication and data storage.
+ - Tailwind CSS - Utility-first CSS framework for styling.
+ - Amadeus API - For flight and hotel booking data.
+ - Google Places API - For retrieving restaurant and hotel information.
+ - Stripe API - For payment processing.
 
 For the majority of our pages, we are using external API services (Amadeus, Google, Stripe, etc.). In order for the pages to work you would need access keys. Please, create .env files
 for both frontend and backend and populate them with the following:
@@ -54,15 +54,15 @@ To run Tripago, you'll need to set up the following environment variables in .en
 
 ### Backend .env:
 Sign up to get your own API key: 
-https://developers.amadeus.com/register 
-https://developers.amadeus.com/self-service/category/flights 
-https://developers.amadeus.com/self-service/category/hotels
+ - https://developers.amadeus.com/register 
+ - https://developers.amadeus.com/self-service/category/flights 
+ - https://developers.amadeus.com/self-service/category/hotels
 
-https://developers.google.com/maps/documentation/places/web-service
+ - https://developers.google.com/maps/documentation/places/web-service
 
-https://firebase.google.com/products/auth 
+ - https://firebase.google.com/products/auth 
 
-https://opencagedata.com/pricing
+ - https://opencagedata.com/pricing
 ```bash
 PORT=4000
 AMADEUS_API_KEY= your amadeus key
@@ -81,16 +81,16 @@ NEXT_PUBLIC_APP_ID=your firebase app id
 
 ### Frontend .env:
 Sign up to get your own API key:
-https://dashboard.stripe.com/register 
+ - https://dashboard.stripe.com/register 
 ```bash
 NEXT_PUBLIC_STRIPE_PUBLIC_KEY=your stripe public key
 STRIPE_SECRET_KEY= your stripe secret
 ```
 ### GeoCurrency Conversion:
 Sign up to get your own API key:
-[Location] https://opencagedata.com/pricing
-[Currency Service Country Code] https://restcountries.com/
-[Exchange rate] https://www.exchangerate-api.com/ 
+1. [Location] https://opencagedata.com/pricing
+2. [Currency Service Country Code] https://restcountries.com/
+3. [Exchange rate] https://www.exchangerate-api.com/ 
 
 ```bash
 export async function getCountryFromCoordinates(lat: number, lon: number): Promise<string> {
