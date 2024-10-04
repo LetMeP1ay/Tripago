@@ -1,10 +1,10 @@
-# :earth_asia: Tripago - Your All-in-One Travel App
+# Tripago - Your All-in-One Travel App
 
 Tripago is designed to streamline travel planning by consolidating the key features you need into one easy-to-use app. Whether you're booking flights, finding hotels, or choosing restaurants, Tripago has you covered.
 
 Note: This project is currently in the implementation phase. Key features are being actively developed and refined.
 
-# :rocket: Getting Started
+# Getting Started
 Follow these instructions to set up Tripago on your local machine for development and testing purposes.
 
 # Prerequisites
@@ -48,7 +48,7 @@ For the majority of our pages, we are using external API services (Amadeus, Goog
 for both frontend and backend and populate them with the following:
 
 
-# 🔑 Environmental Variables
+# Environmental Variables
 ⚠️ Important: Ensure that the .env files are correctly set up before running the application to prevent any issues.
 To run Tripago, you'll need to set up the following environment variables in .env files for both the frontend and backend.
 
