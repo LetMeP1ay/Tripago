@@ -9,6 +9,7 @@ export default function Map() {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [selectedFilter, setSelectedFilter] = useState("default");
   const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
+  const [infoWindow, setInfoWindow] = useState<google.maps.InfoWindow | null>(null);
 
   useEffect(() => {
     const initMap = async () => {
@@ -29,6 +30,8 @@ export default function Map() {
 
       const input = inputRef.current as HTMLInputElement;
       const searchBox = new google.maps.places.SearchBox(input);
+      const infoWindowInstance = new google.maps.InfoWindow();
+      setInfoWindow(infoWindowInstance);
 
       map.addListener("bounds_changed", () => {
         searchBox.setBounds(map.getBounds() as google.maps.LatLngBounds);
@@ -52,6 +55,7 @@ export default function Map() {
             title: place.name,
           });
 
+          marker.addListener("click", () => showPlaceDetails(place.place_id as string, marker, map, infoWindowInstance));
           setMarkers((prevMarkers) => [...prevMarkers, marker]);
 
             bounds.extend(place.geometry.location);
@@ -82,6 +86,7 @@ export default function Map() {
                   position: place.geometry.location,
                   title: place.name,
                 });
+                marker.addListener("click", () => showPlaceDetails(place.place_id as string, marker, map, infoWindowInstance));
                 newMarkers.push(marker);
                 bounds.extend(place.geometry.location);
               }
@@ -95,6 +100,32 @@ export default function Map() {
         });
       }
     };
+
+    const showPlaceDetails = (
+      placeId: string,
+      marker: google.maps.Marker,
+      map: google.maps.Map,
+      infoWindow: google.maps.InfoWindow
+    ) => {
+      const placesService = new google.maps.places.PlacesService(map);
+    
+      placesService.getDetails({ placeId }, (place, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK && place) {
+          let content = `<div style="color: black;font-family: Arial, sans-serif; padding: 10px; box-sizing: border-box;">
+          <strong style="font-size: 16px; display: block; margin-bottom: 8px;">${place.name}</strong>
+          ${place.rating ? `<div style="margin-bottom: 8px;">Rating: ${place.rating}</div>` : ''}
+          ${place.formatted_phone_number ? `<div style="margin-bottom: 8px;">Phone: ${place.formatted_phone_number}</div>` : ''}
+          ${place.opening_hours && place.opening_hours.weekday_text ? `<div style="margin-bottom: 8px;">Hours:<br/>${place.opening_hours.weekday_text.join('<br/>')}</div>` : `<div style="margin-bottom: 8px;">Hours: Not available</div>`}
+          ${place.photos && place.photos.length > 0? `<img src="${place.photos[0].getUrl({ maxWidth: 200 })}" alt="Place image" style="max-width: 100%; margin-top: 8px;">`: ''}</div>`;
+
+          infoWindow.setContent(content);
+          infoWindow.open(map, marker);
+        } else {
+          console.log('Details not available', status);
+        }
+      });
+    };
+    
 
     initMap();
   }, [selectedFilter]);
