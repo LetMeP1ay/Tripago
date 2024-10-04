@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import AirlineLogo from "./AirlineLogo";
 
 interface FlightSegment {
@@ -168,7 +168,9 @@ export const FlightDetails: React.FC<FlightDetailsProps> = ({
         </div>
 
         <div className="flex items-center justify-center w-full lg:w-auto">
-          <p className="text-xl font-bold">$ {flight.price.total}</p>
+          <p className="text-xl font-bold">
+            {flight.price.currency} {flight.price.total}
+          </p>
         </div>
       </div>
     </div>
