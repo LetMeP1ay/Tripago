@@ -5,8 +5,7 @@ import axios from "axios";
 import SearchBar from "@/components/SearchBar";
 import FlightDetails from "@/components/FlightDetails";
 import { useRouter } from "next/navigation";
-import {getUserHomeCurrency} from "../../services/currencyConversion";
-import {getUserCurrencyConversion} from "../../services/currencyConversion";
+import { getUserHomeCurrency } from "../../services/currencyConversion";
 import CurrencyDropdown from "@/components/CurrencyDropdown";
 
 enum TripType {
@@ -29,7 +28,7 @@ export default function FlightSearch() {
   const [departureDate, setDepartureDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [adults, setAdults] = useState(1);
-  const [currencyCode, setCurrencyCode] = useState<string>("NZD");
+  const [currencyCode, setCurrencyCode] = useState<string>("");
   const [flightClass, setFlightClass] = useState<FlightClass>(
     FlightClass.Economy
   );
@@ -41,11 +40,12 @@ export default function FlightSearch() {
       try {
         const homeCurrency = await getUserHomeCurrency();
         setCurrencyCode(homeCurrency);
-      } catch(e) {
+      } catch (e) {
         console.error("Failed to fetch home currency", e);
       }
-    }
-  })
+    };
+    getCurrency();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -126,11 +126,13 @@ export default function FlightSearch() {
           Multi-City
         </button>
       </div>
+      {/* The flight search component that is responsible for reading user's input of the flight data */}
       <form
         onSubmit={handleSubmit}
         className="flex flex-col w-80 rounded-xl shadow-2xl pt-8 pb-8 p-4 mb-16"
       >
         <div className="pb-[31px]">
+          {/* Search bar component is used for creating the input fields for the users */}
           <SearchBar
             type="text"
             value={origin}
@@ -193,13 +195,18 @@ export default function FlightSearch() {
         >
           Search
         </button>
-        <CurrencyDropdown selectedCurrency={currencyCode} onCurrencyChange={setCurrencyCode}/>
+        {/* Another encapsulated component that is responsible for updating user's currency */}
+        <CurrencyDropdown
+          selectedCurrency={currencyCode}
+          onCurrencyChange={setCurrencyCode}
+        />
       </form>
-
+      {/* Function that maps the response of Amadeus API in a flight details component if results exist (when we receive the response) */}
       {results && (
         <div className="w-full lg:w-auto p-4 flex flex-col items-center justify-center">
           {results?.data?.map((flight: any) => (
             <div key={flight.id} className="w-full flex flex-col items-center">
+              {/* Component that renders the response itself */}
               <FlightDetails
                 flight={flight}
                 carriers={results.dictionaries.carriers}
