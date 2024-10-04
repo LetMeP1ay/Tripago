@@ -133,38 +133,41 @@ export default function Map() {
         if (status === google.maps.places.PlacesServiceStatus.OK && place) {
           const headerDiv = document.createElement('div');
           const contentDiv = document.createElement('div');
-        
+
           headerDiv.style.color = 'black';
           headerDiv.style.fontFamily = 'Arial, sans-serif';
           headerDiv.style.padding = '10px';
           headerDiv.style.boxSizing = 'border-box';
-        
+
           const ratingContainer = document.createElement('div');
           ratingContainer.style.display = 'flex';
           ratingContainer.style.alignItems = 'center';
-        
+
           const ratingText = document.createElement('span');
-          ratingText.innerHTML = `${place.rating} (${place.user_ratings_total})`;
-        
+          ratingText.innerHTML = `${place.rating}`;
+          const ratingCount = document.createElement("span");
+          ratingCount.innerHTML = `(${place.user_ratings_total})`;
           ratingContainer.appendChild(ratingText);
-        
+
           const ratingDiv = document.createElement('div');
           ratingDiv.style.marginLeft = '8px';
+          ratingDiv.style.marginRight = '8px';
           ratingContainer.appendChild(ratingDiv);
-        
+          ratingContainer.appendChild(ratingCount);
+
           headerDiv.innerHTML = `
             <strong style="font-size: 16px; display: block; margin-bottom: 8px;">${place.name}</strong>
             ${place.formatted_phone_number ? `<div style="margin-bottom: 8px;">Phone: ${place.formatted_phone_number}</div>` : ''}
           `;
-        
+
           headerDiv.appendChild(ratingContainer);
           headerDiv.appendChild(contentDiv);
-        
+
           ReactDOM.render(
             <Rating value={place.rating || 0} precision={0.1} readOnly />,
             ratingDiv
           );
-        
+
           contentDiv.innerHTML = `
             ${place.opening_hours && place.opening_hours.weekday_text ?
               `<div style="margin-bottom: 8px;">Hours:<br/>${place.opening_hours.weekday_text.join('<br/>')}</div>` :
@@ -172,7 +175,7 @@ export default function Map() {
             }
             ${place.photos && place.photos.length > 0 ? `<img src="${place.photos[0].getUrl({ maxWidth: 200 })}" alt="Place image" style="max-width: 100%; margin-top: 8px;">` : ''}
           `;
-        
+
           infoWindow.setContent(headerDiv);
           infoWindow.open(map, marker);
         } else {
