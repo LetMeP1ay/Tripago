@@ -3,8 +3,23 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+interface FoodOffer {
+    type: string;
+    food: {
+        type: string;
+        foodId: string;
+        name: string;
+        cityCode: string;
+    };
+    open: boolean;
+
+    self: string;
+}
 
 export default function FindFood() {
+    const router = useRouter();
+
+    const query = new URLSearchParams(window.location.search);
     
     const gap = "15px";
     const desktopImgSize = "w-[300px] h-[220px]"
