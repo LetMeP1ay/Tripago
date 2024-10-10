@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+<<<<<<< HEAD
 import { getCountryFromCoordinates, getUserCoords, getUserLocation } from "@/services/locationService";
+=======
+>>>>>>> 4c4171a972d8d79616e6acbdd238b439c920750c
 
 interface FoodOffer {
     type: string;
@@ -11,16 +14,21 @@ interface FoodOffer {
         foodId: string;
         name: string;
         cityCode: string;
+<<<<<<< HEAD
         latitude: number;
         longitude: number;
     };
     available: boolean;
+=======
+    };
+>>>>>>> 4c4171a972d8d79616e6acbdd238b439c920750c
     open: boolean;
 
     self: string;
 }
 
 export default function FindFood() {
+<<<<<<< HEAD
     
     const router = useRouter();
     
@@ -87,6 +95,11 @@ export default function FindFood() {
           console.error("Error fetching hotel images:", error);
         }
       };
+=======
+    const router = useRouter();
+
+    const query = new URLSearchParams(window.location.search);
+>>>>>>> 4c4171a972d8d79616e6acbdd238b439c920750c
     
     const gap = "15px";
     const desktopImgSize = "w-[300px] h-[220px]"
@@ -95,7 +108,10 @@ export default function FindFood() {
     return (
         <div className={`px-[${gap}] py-[15px] flex-col justify-start items-center gap-[15px] inline-flex w-screen bg-white text-black`}>
         <div className="justify-between items-center inline-flex w-full">
+<<<<<<< HEAD
             
+=======
+>>>>>>> 4c4171a972d8d79616e6acbdd238b439c920750c
             <div>
                 <p>What Would you like to eat?</p>
             </div>
@@ -116,11 +132,14 @@ export default function FindFood() {
                 <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Price</p></div>
             </div>
 
+<<<<<<< HEAD
         <div>
 
             
         </div>
 
+=======
+>>>>>>> 4c4171a972d8d79616e6acbdd238b439c920750c
         <div className="pt-[30px]"> {/*whole food card*/} 
         <div className="relative flex py-5 items-center">
                 <div className="flex-grow border-t border-gray-400"></div>
@@ -131,6 +150,27 @@ export default function FindFood() {
                 <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
                     <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400" />
                 </div>
+<<<<<<< HEAD
+=======
+                <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
+                    <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400" />
+                </div>
+                <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
+                    <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400" />
+                </div>
+                <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
+                    <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400" />
+                </div>
+                <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
+                    <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400" />
+                </div>
+                <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
+                    <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400" />
+                </div>
+                <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
+                    <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400" />
+                </div>
+>>>>>>> 4c4171a972d8d79616e6acbdd238b439c920750c
             </div> {/*Images End*/}
             <div> {/*Bio*/}
                 <div className="justify-center items-between inline-flex flex-1 w-screen gap-[15px] px-[15px]"> {/*Information*/}
@@ -177,8 +217,11 @@ export default function FindFood() {
                 </div>
             </div>{/*Action Buttons end*/} 
         </div> {/*whole food card end*/} 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 4c4171a972d8d79616e6acbdd238b439c920750c
         
         
         
