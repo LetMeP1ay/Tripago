@@ -45,27 +45,6 @@ const getPhotoReferences = async (placeId) => {
   }
 };
 
-const getFoodInArea = async (longitude, latitude) => {
-  const placeDetailsUrl = `
-  https://maps.googleapis.com/maps/api/place/nearbysearch/json
-  ?keyword=food
-  &location=${longitude}%2C${latitude}
-  &radius=100
-  &type=restaurant
-  &key=${process.env.PLACES_API_KEY}
-  `;
-
-  try {
-    const response = await axios.get(placeDetailsUrl);
-    const photos = response.data.result.photos || [];
-    const photoReferences = photos.map((photo) => photo.photo_reference);
-    return photoReferences;
-  } catch (error) {
-    console.error("Error fetching Place Details:", error.message);
-    throw error;
-  }
-};
-
 const getPhotoUrl = (photoReference, maxWidth = 400) => {
   return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidth}&photoreference=${photoReference}&key=${process.env.PLACES_API_KEY}`;
 };
@@ -90,6 +69,46 @@ app.get("/api/hotel-images", async (req, res) => {
   } catch (error) {
     console.error("Error fetching hotel images:", error.message);
     res.status(500).json({ error: "Failed to fetch hotel images." });
+  }
+});
+
+const getFoodInArea = async (latitude, longitude) => {
+  const placeDetailsUrl = `
+  https://maps.googleapis.com/maps/api/place/nearbysearch/json
+  ?keyword=food
+  &location=${longitude}%2C${latitude}
+  &radius=100
+  &type=restaurant
+  &key=${process.env.PLACES_API_KEY}
+  `;
+
+  try {
+    const response = await axios.get(placeDetailsUrl);
+    const photos = response.data.result.photos || [];
+    const photoReferences = photos.map((photo) => photo.photo_reference);
+    return placeDetailsUrl;
+  } catch (error) {
+    console.error("Error fetching Place Details:", error.message);
+    throw error;
+  }
+};
+
+app.get("/api/food-info", async (req, res) => {
+  const {lat, lng} = req.query;
+
+  try {
+    const foodInfo = await getFoodInArea(lat, lng);
+
+    if(foodInfo.length === 0) {
+      return res
+        .status(404)
+        .json({message: "No Info for this place"});
+    }
+
+    res.json ({info : foodInfo});
+  } catch (error) {
+    console.error("Error fetching Food Details:", error.message);
+    res.status(500).json({ error: "Failed to fetch food."});
   }
 });
 

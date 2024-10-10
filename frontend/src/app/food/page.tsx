@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getUserLocation } from "@/services/locationService";
+import { getCountryFromCoordinates, getUserCoords, getUserLocation } from "@/services/locationService";
 
 interface FoodOffer {
     type: string;
@@ -21,6 +21,7 @@ interface FoodOffer {
 }
 
 export default function FindFood() {
+    
     const router = useRouter();
     
     const query = new URLSearchParams(window.location.search);
@@ -30,7 +31,28 @@ export default function FindFood() {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [foodImages, setFoodImages] = useState<Record<string, string[]>>({});
-    console.log(getUserLocation())
+    const [latitude, setLatitude] = useState<number>();
+    const [longitude, setLongitude] = useState<number>();
+
+    useEffect(() => {
+        const getLocation = async () => {
+            if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                setLatitude(position.coords.latitude);
+                setLongitude(position.coords.longitude);
+            }, (error) => {
+                if (error) {
+                setLatitude(-36.8484611);
+                setLongitude(174.7597086);
+                }
+            })
+            }
+        }; getLocation()
+    }, []);
+    `${process.env.NEXT_PUBLIC_API_URL}/api/food-info`
+    
+    console.log(latitude, longitude);
+    
     const fetchFoodByCity = async (): Promise<string[]> => {
         try {
             const response = await fetch(
