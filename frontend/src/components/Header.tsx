@@ -78,29 +78,28 @@ export default function Header() {
             />
             {!isDesktop && <NotificationBell />}
           </div>
-          {!pathname.includes("/cart") ||
-            (isDesktop && (
-              <div className="flex justify-center items-center space-x-3 md:space-x-8 mt-8 md:mt-0 md:ml-auto md:mr-8">
-                <NavButton
-                  type={isDesktop ? "text" : "button"}
-                  label="Hotels"
-                  isActive={activeButton === "Hotels"}
-                  onClick={() => router.push("/hotels")}
-                />
-                <NavButton
-                  type={isDesktop ? "text" : "button"}
-                  label="Flights"
-                  isActive={activeButton === "Flights"}
-                  onClick={() => router.push("/flights")}
-                />
-                <NavButton
-                  type={isDesktop ? "text" : "button"}
-                  label="Food"
-                  isActive={activeButton === "Food"}
-                  onClick={() => router.push("/food")}
-                />
-              </div>
-            ))}
+          {!(pathname.includes("/cart") && !isDesktop) && (
+            <div className="flex justify-center items-center space-x-3 md:space-x-8 mt-8 md:mt-0 md:ml-auto md:mr-8">
+              <NavButton
+                type={isDesktop ? "text" : "button"}
+                label="Hotels"
+                isActive={activeButton === "Hotels"}
+                onClick={() => router.push("/hotels")}
+              />
+              <NavButton
+                type={isDesktop ? "text" : "button"}
+                label="Flights"
+                isActive={activeButton === "Flights"}
+                onClick={() => router.push("/flights")}
+              />
+              <NavButton
+                type={isDesktop ? "text" : "button"}
+                label="Food"
+                isActive={activeButton === "Food"}
+                onClick={() => router.push("/food")}
+              />
+            </div>
+          )}
           {isDesktop && (
             <div className="flex items-center space-x-8">
               <NavButton
