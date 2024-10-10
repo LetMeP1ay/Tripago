@@ -17,3 +17,14 @@ export function getUserLocation(): Promise<GeolocationPosition> {
     return data.results[0].components.country_code.toUpperCase();
   }
   
+  export async function getUserCoords(): Promise<number[]> {
+    try {
+      const position = await getUserLocation();
+      const userLongitude = position.coords.longitude;
+      const userLatitude = position.coords.latitude;
+      return [userLongitude, userLatitude];
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { getUserLocation } from "@/services/locationService";
 
 interface FoodOffer {
     type: string;
@@ -10,7 +11,10 @@ interface FoodOffer {
         foodId: string;
         name: string;
         cityCode: string;
+        latitude: number;
+        longitude: number;
     };
+    available: boolean;
     open: boolean;
 
     self: string;
@@ -18,8 +22,88 @@ interface FoodOffer {
 
 export default function FindFood() {
     const router = useRouter();
-
+    
     const query = new URLSearchParams(window.location.search);
+    const cityCode = query.get("cityCode") || "";
+
+    const [foodOffers, setFoodOffers] = useState<FoodOffer[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    const [foodImages, setFoodImages] = useState<Record<string, string[]>>({});
+    console.log(getUserLocation())
+    const fetchFoodByCity = async (): Promise<string[]> => {
+        try {
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/food?cityCode=${cityCode}`
+            );
+            const data = await response.json();
+            const FoodIds = data?.data?.map(
+                (food: { foodId: string }) => food.foodId
+            );
+            return FoodIds;
+        } catch (error) {
+            console.error("Error fetching food by city:", error);
+            setError("Failed to fetch food.");
+            return [];
+        }
+    };
+
+    const fetchFoodOffers = async (foodIds: string[]) => {
+        if (!cityCode || foodIds.length == 0) {
+            setError("Missing city code or food IDS.");
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+
+        const foodIdsParam = foodIds.join(",");
+
+        let queryString = `foodIds=${foodIdsParam}}`;
+
+        try {
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/food-offers?${queryString}`
+            );
+            const data = await response.json();
+
+            if (data.data && Array.isArray(data.data)) {
+                setFoodOffers((prevOffers) => [...prevOffers, ...data.data]);
+                setError(null);
+
+                const availableFoodIds = data.data
+                    .filter((offer: FoodOffer) => offer.available)
+                    .map((offer: FoodOffer) => offer.food.foodId);
+                
+                await fetchImagesForFood(data.data);
+            } else {
+                setError("No Food offers ");
+            }
+            } catch (error) {
+                console.error("Error fetching hotel offers:", error);
+                setError("Failed to fetch hotel offers.");
+            } finally {
+                setLoading(false);
+        }
+    };
+
+    const fetchImagesForFood = async (foodOffers: FoodOffer[]) => {
+        try {
+            for (let offer of foodOffers) {
+            const { name, latitude, longitude } = offer.food;
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/food-images?foodName=${name}&lat=${latitude}&lng=${longitude}`
+            );
+            const data = await response.json();
+            setFoodImages((prevImages) => ({
+                ...prevImages,
+                [offer.food.foodId]: data.photos || [],
+            }));
+            }
+        } catch (error) {
+            console.error("Error fetching food images:", error);
+        }
+    };
     
     const gap = "15px";
     const desktopImgSize = "w-[300px] h-[220px]"
@@ -28,6 +112,7 @@ export default function FindFood() {
     return (
         <div className={`px-[${gap}] py-[15px] flex-col justify-start items-center gap-[15px] inline-flex w-screen bg-white text-black`}>
         <div className="justify-between items-center inline-flex w-full">
+            
             <div>
                 <p>What Would you like to eat?</p>
             </div>
@@ -55,24 +140,6 @@ export default function FindFood() {
                 <div className="flex-grow border-t border-gray-400"></div>
             </div>
             <div className="flex overflow-x-auto space-x-[15px] w-screen px-[15px]"> {/*Images*/}
-                <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
-                    <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400" />
-                </div>
-                <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
-                    <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400" />
-                </div>
-                <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
-                    <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400" />
-                </div>
-                <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
-                    <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400" />
-                </div>
-                <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
-                    <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400" />
-                </div>
-                <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
-                    <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400" />
-                </div>
                 <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
                     <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400" />
                 </div>
@@ -122,6 +189,8 @@ export default function FindFood() {
                 </div>
             </div>{/*Action Buttons end*/} 
         </div> {/*whole food card end*/} 
+
+
         
         
         

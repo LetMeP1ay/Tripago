@@ -45,6 +45,27 @@ const getPhotoReferences = async (placeId) => {
   }
 };
 
+const getFoodInArea = async (longitude, latitude) => {
+  const placeDetailsUrl = `
+  https://maps.googleapis.com/maps/api/place/nearbysearch/json
+  ?keyword=food
+  &location=${longitude}%2C${latitude}
+  &radius=100
+  &type=restaurant
+  &key=${process.env.PLACES_API_KEY}
+  `;
+
+  try {
+    const response = await axios.get(placeDetailsUrl);
+    const photos = response.data.result.photos || [];
+    const photoReferences = photos.map((photo) => photo.photo_reference);
+    return photoReferences;
+  } catch (error) {
+    console.error("Error fetching Place Details:", error.message);
+    throw error;
+  }
+};
+
 const getPhotoUrl = (photoReference, maxWidth = 400) => {
   return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidth}&photoreference=${photoReference}&key=${process.env.PLACES_API_KEY}`;
 };
