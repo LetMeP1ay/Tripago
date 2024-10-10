@@ -21,7 +21,9 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="Logo.svg" />
       </head>
-      <body className={`${inter.className} flex flex-col min-h-screen`}>
+      <body
+        className={`${inter.className} flex flex-col min-h-screen overflow-hidden bg-white text-black`}
+      >
         <Header />
         <main className="flex-grow p-6">{children}</main>
         <Footer />

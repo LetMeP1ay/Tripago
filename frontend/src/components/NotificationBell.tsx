@@ -13,10 +13,11 @@ const NotificationBell: React.FC = () => {
   return (
     <div onClick={handleClick}>
       <button
-        className="flex justify-center items-center w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-black opacity-20 p-2 hover:opacity-40 active:opacity-60 transition-all duration-600 ease-in-out"
+        className="flex justify-center items-center w-8 h-8 md:w-10 md:h-10 md:border-white rounded-full border-2 border-black 
+        opacity-20 p-2 hover:opacity-40 active:opacity-60 transition-all duration-600 ease-in-out md:opacity-60 md:hover:opacity-80 md:active:opacity-100"
         onClick={handleClick}
       >
-        <FaBell size={0} className="text-black w-8 h-8 md:w-10 md:h-10" />
+        <FaBell size={0} className="text-black w-8 h-8 md:w-10 md:h-10 md:text-white" />
       </button>
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
