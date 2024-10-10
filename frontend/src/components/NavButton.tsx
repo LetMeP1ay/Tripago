@@ -53,10 +53,10 @@ export default function NavButton({
       return (
         <p
           className={
-            `w-full font-medium text-2xl transition-all duration-600 ease-in-out cursor-pointer ` +
+            `w-full font-medium md:text-lg lg:text-2xl transition-all duration-600 ease-in-out cursor-pointer ` +
             (isActive
               ? `text-[#71D1FC] hover:text-[#5BBEEB] active:text-[#5AAEEA]`
-              : `text-[#BBB] hover:text-[#AAA] active:text-[#A0A0A0]`)
+              : `text-[#DDD] hover:text-[#EEE] active:text-[#FFF]`)
           }
           onClick={handleClick}
         >

@@ -29,9 +29,9 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const [activeButton, setActiveButton] = useState<string>("");
+  const [loadingScreen, setLoadingScreen] = useState<boolean>(true);
 
   const windowWidth = useWindowWidth();
-
   const isDesktop = windowWidth >= 768;
 
   useEffect(() => {
@@ -41,13 +41,44 @@ export default function Header() {
       setActiveButton("Food");
     } else if (pathname.includes("/hotels")) {
       setActiveButton("Hotels");
+    } else if (pathname.includes("/favorites")) {
+      setActiveButton("Favorites");
+    } else if (pathname.includes("/cart")) {
+      setActiveButton("Cart");
+    } else if (pathname.includes("/profile")) {
+      setActiveButton("Profile");
+    } else if (pathname.includes("/")) {
+      setActiveButton("Map");
     } else {
       setActiveButton("");
     }
   }, [pathname]);
 
+  function displayViewSetter() {
+    setLoadingScreen(false);
+  }
+
+  useEffect(() => {
+    setTimeout(displayViewSetter, 2000);
+  }, []);
+
+  if (loadingScreen && isDesktop) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center">
+        <div
+          className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-black"
+          role="status"
+        >
+          <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+            Loading...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <header className="w-full">
+    <header className="w-full md:bg-[#474646]">
       <nav className="p-4 flex flex-col md:flex-row md:justify-between md:items-center">
         <div className="flex justify-between items-center w-full md:w-auto">
           <Image
@@ -55,12 +86,10 @@ export default function Header() {
             alt="Tripago Logo"
             width={0}
             height={0}
-            className="w-28 md:w-40 hover:cursor-pointer"
+            className="w-24 hover:cursor-pointer"
             onClick={() => router.push("/")}
           />
-          <div className="md:hidden">
-            <NotificationBell />
-          </div>
+          {!isDesktop && <NotificationBell />}
         </div>
         <div className="flex justify-center items-center space-x-3 md:space-x-8 mt-8 md:mt-0 md:ml-auto md:mr-8">
           <NavButton
@@ -82,9 +111,35 @@ export default function Header() {
             onClick={() => router.push("/food")}
           />
         </div>
-        <div className="hidden md:flex">
-          <NotificationBell />
-        </div>
+        {isDesktop && (
+          <div className="flex items-center space-x-8">
+            <NavButton
+              type="text"
+              label="Map"
+              isActive={activeButton === "Map"}
+              onClick={() => router.push("/")}
+            />
+            <NavButton
+              type="text"
+              label="Favorites"
+              isActive={activeButton === "Favorites"}
+              onClick={() => router.push("/favorites")}
+            />
+            <NavButton
+              type="text"
+              label="Cart"
+              isActive={activeButton === "Cart"}
+              onClick={() => router.push("/cart")}
+            />
+            <NavButton
+              type="text"
+              label="Profile"
+              isActive={activeButton === "Profile"}
+              onClick={() => router.push("/profile")}
+            />
+            <NotificationBell />
+          </div>
+        )}
       </nav>
     </header>
   );
