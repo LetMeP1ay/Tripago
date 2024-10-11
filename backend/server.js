@@ -74,10 +74,11 @@ app.get("/api/hotel-images", async (req, res) => {
 
 const getFoodInArea = async (latitude, longitude) => {
   const placeDetailsUrl = `
-  https://maps.googleapis.com/maps/api/place/nearbysearch/json?keyword=food&location=${latitude}%2C${longitude}&radius=500&type=restaurant&key=${process.env.FOOD_API_KEY}`;
+  https://maps.googleapis.com/maps/api/place/nearbysearch/json?keyword=food&location=${latitude}%2C${longitude}&radius=250&type=restaurant&key=${process.env.FOOD_API_KEY}`;
 
   try {
     const response = await axios.get(placeDetailsUrl);
+    console.log(response);
     return response.data?.results;
   } catch (error) {
     console.error("Error fetching Place Details:", error.message);
@@ -95,11 +96,16 @@ app.get("/api/food-info", async (req, res) => {
       return res.status(404).json({ message: "No Info for this place" });
     }
 
-    res.json({ info: foodInfo });
+    res.json( foodInfo );
   } catch (error) {
     console.error("Error fetching Food Details:", error.message);
     res.status(500).json({ error: "Failed to fetch food." });
   }
+});
+
+app.get("/api/food-info-test", async (req, res) => {
+  const data = req.query;
+  res.json( data );
 });
 
 const amadeusAuth = axios.create({
