@@ -291,9 +291,6 @@ export default function HotelBookings() {
               {hotelImages[offer.hotel.hotelId] &&
               hotelImages[offer.hotel.hotelId].length > 0 ? (
                 <div className="flex flex-wrap gap-2">
-                  
-                  
-                  
                   {hotelImages[offer.hotel.hotelId].map((imageUrl, index) => (
                     <img
                       key={index}

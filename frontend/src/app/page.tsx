@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import React, { useEffect, useState } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
 import TopBar from "./TopBar";
 import { Rating } from "@mui/material";
@@ -38,7 +37,6 @@ export default function Map() {
         apiKey: process.env.NEXT_PUBLIC_MAPS_API_KEY as string,
         version: "weekly",
         libraries: ["places"],
-        libraries: ["places"],
       });
 
       await loader.load();
@@ -47,7 +45,6 @@ export default function Map() {
         center: { lat: lat, lng: lon },
         zoom: 15,
         mapId: "MY_MAPS_MAPID",
-        disableDefaultUI: true,
         disableDefaultUI: true,
       });
 
@@ -64,8 +61,6 @@ export default function Map() {
         const places = searchBox.getPlaces();
         if (!places || places.length === 0) return;
 
-        markers.forEach((marker) => marker.setMap(null));
-        setMarkers([]);
         markers.forEach((marker) => marker.setMap(null));
         setMarkers([]);
         const bounds = new google.maps.LatLngBounds();
@@ -242,18 +237,6 @@ export default function Map() {
           className={`grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex mx-1 ${selectedFilter === "lodging" ? "bg-blue-500 text-white" : "text-black"}`}>
           Hotels
         </button>
-      </div>
-      {/* Filter Dropdown */}
-      <div className="absolute top-28 left-1/2 transform -translate-x-1/2 z-10 w-3/4 sm:w-1/2 lg:w-1/3 flex justify-center mt-4 text-black">
-        <select
-          value={selectedFilter}
-          onChange={(e) => setSelectedFilter(e.target.value)}
-          className="w-full p-3 rounded-lg shadow-md border border-gray-300 focus:outline-none"
-        >
-          <option value="default">Default</option>
-          <option value="restaurant">Restaurants</option>
-          <option value="lodging">Hotels</option>
-        </select>
       </div>
     </div>
   );
