@@ -20,6 +20,10 @@ export default function Footer() {
     }
   }, [pathname]);
 
+  if (pathname.includes("/login") || pathname.includes("/signup")) {
+    return "";
+  }
+
   return (
     <footer>
       <div className="fixed bottom-0 left-0 w-full p-4 px-8 flex justify-between items-center bg-white border-t-2 md:hidden">
