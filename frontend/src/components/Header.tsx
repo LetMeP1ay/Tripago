@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import NavButton from "@/components/NavButton";
 import NotificationBell from "@/components/NotificationBell";
-import { getUserLocation } from "@/services/locationService";
 
 function useWindowWidth() {
   const [windowWidth, setWindowWidth] = useState<number>(0);
@@ -55,12 +54,18 @@ export default function Header() {
     }
   }, [pathname]);
 
-  function displayViewSetter() {
-    setScreenLoaded(true);
-  }
+  useEffect(() => {
+    if (screenLoaded) {
+      document.body.classList.remove("overflow-hidden");
+    }
+  }, [screenLoaded]);
 
   useEffect(() => {
-    setTimeout(displayViewSetter, 800);
+    const timeout = setTimeout(() => {
+      setScreenLoaded(true);
+    }, 800);
+
+    return () => clearTimeout(timeout);
   }, []);
 
   if (screenLoaded) {
