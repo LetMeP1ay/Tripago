@@ -175,7 +175,7 @@ export default function HotelBookings() {
 
   const fetchHotelRatingsInBatches = async (hotelIds: string[]) => {
     for (let i = 0; i < hotelIds.length; i += RATING_BATCH_SIZE) {
-      const batch = hotelIds.slice(i, i + RATING_BATCH_SIZE);
+      const batch = hotelIds?.slice(i, i + RATING_BATCH_SIZE);
       await fetchHotelRatings(batch);
     }
   };
@@ -221,9 +221,7 @@ export default function HotelBookings() {
     fetchOffersInBatches();
   }, [cityCode, checkInDate, checkOutDate]);
 
-  const gap = "15px";
   const numFeatured = 3;
-  const dispNum = 3;
   return (
     <div
       className={`flex-col justify-start items-center gap-[15px] inline-flex w-full ${
