@@ -224,7 +224,7 @@ export default function HotelBookings() {
   const numFeatured = 3;
   return (
     <div
-      className={`flex-col justify-start items-center gap-[15px] inline-flex w-full ${
+      className={`flex-col justify-start items-center gap-[15px] inline-flex w-full p-6 ${
         hotelOffers.length > 0 ? "h-auto" : "h-full"
       } bg-white text-black`}
     >

@@ -68,6 +68,9 @@ export default function Header() {
     return () => clearTimeout(timeout);
   }, []);
 
+  if (pathname.includes("/login") || pathname.includes("/signup")) {
+    return "";
+  }
   if (screenLoaded) {
     return (
       <header className="w-full md:bg-[#474646]">
