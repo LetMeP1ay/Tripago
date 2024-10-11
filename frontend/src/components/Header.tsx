@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import NavButton from "@/components/NavButton";
 import NotificationBell from "@/components/NotificationBell";
+import { getUserLocation } from "@/services/locationService";
 
 function useWindowWidth() {
   const [windowWidth, setWindowWidth] = useState<number>(0);
@@ -33,7 +34,6 @@ export default function Header() {
 
   const [activeButton, setActiveButton] = useState<string>("");
   const [screenLoaded, setScreenLoaded] = useState<boolean>(false);
-  const [carouselScreen, setCarouselScreen] = useState<boolean>(true);
 
   useEffect(() => {
     if (pathname.includes("/flights")) {
