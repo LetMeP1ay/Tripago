@@ -74,12 +74,11 @@ app.get("/api/hotel-images", async (req, res) => {
 
 const getFoodInArea = async (latitude, longitude) => {
   const placeDetailsUrl = `
-  https://maps.googleapis.com/maps/api/place/nearbysearch/json?keyword=food&location=${latitude}%2C${longitude}&radius=500&type=restaurant&key=${process.env.PLACES_API_KEY}`;
+  https://maps.googleapis.com/maps/api/place/nearbysearch/json?keyword=food&location=${latitude}%2C${longitude}&radius=500&type=restaurant&key=${process.env.FOOD_API_KEY}`;
 
   try {
     const response = await axios.get(placeDetailsUrl);
-    console.log(response.data);
-    return response.data;
+    return response.data?.results;
   } catch (error) {
     console.error("Error fetching Place Details:", error.message);
     throw error;
