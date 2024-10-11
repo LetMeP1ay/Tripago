@@ -61,7 +61,7 @@ export default function FindFood() {
 
         try {
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}api/food-info?lat=${latitude}&lng=${longitude}`
+                `${process.env.NEXT_PUBLIC_API_URL}/api/food-info?lat=${latitude}&lng=${longitude}`
             );
             const location = await response.json();
 

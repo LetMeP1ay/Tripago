@@ -15,10 +15,10 @@ app.use(
 );
 
 const getPlaceId = async (hotelName, lat, lng) => {
-  const textSeatchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?location=${lat},${lng}&query=${hotelName}&radius=10&key=${process.env.PLACES_API_KEY}`;
+  const textSearchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?location=${lat},${lng}&query=${hotelName}&radius=10&key=${process.env.PLACES_API_KEY}`;
 
   try {
-    const response = await axios.get(textSeatchUrl);
+    const response = await axios.get(textSearchUrl);
     const placeId = response.data.results[0]?.place_id;
 
     if (!placeId) {
@@ -74,17 +74,12 @@ app.get("/api/hotel-images", async (req, res) => {
 
 const getFoodInArea = async (latitude, longitude) => {
   const placeDetailsUrl = `
-  https://maps.googleapis.com/maps/api/place/nearbysearch/json
-  ?keyword=food
-  &location=${latitude}%2C${longitude}
-  &radius=500
-  &type=restaurant
-  &key=${process.env.PLACES_API_KEY}
-  `;
+  https://maps.googleapis.com/maps/api/place/nearbysearch/json?keyword=food&location=${latitude}%2C${longitude}&radius=500&type=restaurant&key=${process.env.PLACES_API_KEY}`;
 
   try {
     const response = await axios.get(placeDetailsUrl);
-    return response.json();
+    console.log(response.data);
+    return response.data;
   } catch (error) {
     console.error("Error fetching Place Details:", error.message);
     throw error;
@@ -98,15 +93,13 @@ app.get("/api/food-info", async (req, res) => {
     const foodInfo = await getFoodInArea(lat, lng);
 
     if (foodInfo.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No Info for this place" });
+      return res.status(404).json({ message: "No Info for this place" });
     }
 
     res.json({ info: foodInfo });
   } catch (error) {
     console.error("Error fetching Food Details:", error.message);
-    res.status(500).json({ error: "Failed to fetch food."});
+    res.status(500).json({ error: "Failed to fetch food." });
   }
 });
 
@@ -424,8 +417,7 @@ app.get("/api/hotel-offers", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch hotel offers" });
   }
-}
-)
+});
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
