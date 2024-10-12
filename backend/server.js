@@ -31,6 +31,25 @@ const getPlaceId = async (hotelName, lat, lng) => {
   }
 };
 
+const getPlaceData = async (hotelName, lat, lng) => {
+  const textSeatchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?location=${lat},${lng}&query=${hotelName}&radius=10&key=${process.env.PLACES_API_KEY}`;
+
+  try {
+    const response = await axios.get(textSeatchUrl);
+    const photoReference = response.data.results[0]?.photos[0]?.photo_reference;
+    const photoWidth = response.data.results[0]?.photos[0]?.width;
+    const rating = response.data.results[0]?.rating;
+
+    if (!placeId) {
+      throw new Error("Place ID not found.");
+    }
+    return rating, photoReference, photoWidth;
+  } catch (error) {
+    console.error("Error fetching Place ID:", error.message);
+    throw error;
+  }
+};
+
 const getPhotoReferences = async (placeId) => {
   const placeDetailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${process.env.PLACES_API_KEY}`;
 
@@ -386,8 +405,7 @@ app.get("/api/hotel-offers", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch hotel offers" });
   }
-}
-)
+});
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
