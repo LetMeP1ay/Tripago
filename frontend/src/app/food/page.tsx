@@ -189,7 +189,21 @@ function isBooleanDefined(value?: boolean): boolean {
             <div className="flex overflow-x-auto space-x-[15px] w-screen px-[15px]"> {/*Images*/}
               <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
                 <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400"/>
-                
+              </div>
+              <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
+                <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400"/>
+              </div>
+              <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
+                <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400"/>
+              </div>
+              <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
+                <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400"/>
+              </div>
+              <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
+                <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400"/>
+              </div>
+              <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-y-hidden`}> {/*Image Div*/}
+                <img className="w-[175] h-[175]" src="https://via.placeholder.com/400x400"/>
               </div>
             </div> {/*Images End*/}
             <div> {/*Bio*/}
