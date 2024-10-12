@@ -128,6 +128,10 @@ export default function FindFood() {
         .join(' ');
 }
 
+function isBooleanDefined(value?: boolean): boolean {
+  return value !== undefined;
+}
+
   const gap = "15px";
   const desktopImgSize = "w-[300px] h-[220px]";
   const mobileImgSize = "w-[250px] h-[110px]";
@@ -216,8 +220,12 @@ export default function FindFood() {
               <div className="justify-center items-between inline-flex flex-1 w-screen gap-[15px] px-[15px]"> {/*Opening info*/}
                 <div>
                   <p>
-                    {offer.opening_hours.open_now ? (
-                      "Open"
+                    {isBooleanDefined(offer.opening_hours.open_now) ? (
+                      offer.opening_hours.open_now ? (
+                        "Open"
+                      ) : (
+                        "Closed"
+                      )
                     ) : (
                       "Closed"
                     )}
