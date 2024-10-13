@@ -39,36 +39,12 @@ interface HotelOffer {
   self: string;
 }
 
-interface HotelRating {
-  hotelId: string;
-  overallRating: number;
-  numberOfReviews: number;
-  sentiments: {
-    staff: number;
-    location: number;
-    service: number;
-    roomComforts: number;
-    internet: number;
-    sleepQuality: number;
-    valueForMoney: number;
-    facilities: number;
-    catering: number;
-    pointsOfInterest: number;
-  };
-}
-
-interface RatingWarning {
-  code: number;
-  title: string;
-  detail: string;
-  source: {
-    parameter: string;
-    pointer: string;
-  };
-}
-
 const BATCH_SIZE = 15;
-const RATING_BATCH_SIZE = 3;
+
+interface HotelData {
+  image: string;
+  rating: number;
+}
 
 export default function HotelBookings() {
   const router = useRouter();
@@ -80,13 +56,11 @@ export default function HotelBookings() {
   const adults = query.get("adults") || "1";
 
   const [hotelOffers, setHotelOffers] = useState<HotelOffer[]>([]);
-  const [hotelRatings, setHotelRatings] = useState<HotelRating[]>([]);
-  const [ratingWarnings, setRatingWarnings] = useState<RatingWarning[]>([]);
+  const [hotelData, setHotelData] = useState<Record<string, HotelData>>({});
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [allHotelIds, setAllHotelIds] = useState<string[]>([]);
   const [currentBatch, setCurrentBatch] = useState<number>(0);
-  const [hotelImages, setHotelImages] = useState<Record<string, string[]>>({});
 
   const fetchHotelsByCity = async (): Promise<string[]> => {
     try {
@@ -136,12 +110,7 @@ export default function HotelBookings() {
         setHotelOffers((prevOffers) => [...prevOffers, ...availableOffers]);
         setError(null);
 
-        const availableHotelIds = availableOffers.map(
-          (offer: HotelOffer) => offer.hotel.hotelId
-        );
-
-        await fetchHotelRatingsInBatches(availableHotelIds);
-        await fetchImagesForHotels(availableOffers);
+        await fetchHotelDataForHotels(availableOffers);
       } else {
         setError("No hotel offers found.");
       }
@@ -150,38 +119,6 @@ export default function HotelBookings() {
       setError("Failed to fetch hotel offers.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchHotelRatings = async (hotelIds: string[]) => {
-    if (hotelIds.length === 0) return;
-
-    try {
-      const hotelIdsParam = hotelIds.join(",");
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/hotel-ratings?hotelIds=${hotelIdsParam}`
-      );
-      const data = await response.json();
-
-      if (data.data && Array.isArray(data.data)) {
-        setHotelRatings((prevRatings) => [...prevRatings, ...data.data]);
-      }
-
-      if (data.warnings && Array.isArray(data.warnings)) {
-        setRatingWarnings((prevWarnings) => [
-          ...prevWarnings,
-          ...data.warnings,
-        ]);
-      }
-    } catch (error) {
-      console.error("Error fetching hotel ratings:", error);
-    }
-  };
-
-  const fetchHotelRatingsInBatches = async (hotelIds: string[]) => {
-    for (let i = 0; i < hotelIds.length; i += RATING_BATCH_SIZE) {
-      const batch = hotelIds?.slice(i, i + RATING_BATCH_SIZE);
-      await fetchHotelRatings(batch);
     }
   };
 
@@ -195,21 +132,30 @@ export default function HotelBookings() {
     }
   };
 
-  const fetchImagesForHotels = async (hotelOffers: HotelOffer[]) => {
+  const fetchHotelDataForHotels = async (hotelOffers: HotelOffer[]) => {
     try {
       for (let offer of hotelOffers) {
-        const { name, latitude, longitude } = offer.hotel;
+        const { name, latitude, longitude, hotelId } = offer.hotel;
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/hotel-images?hotelName=${name}&lat=${latitude}&lng=${longitude}`
+          `${
+            process.env.NEXT_PUBLIC_API_URL
+          }/api/hotel-data?hotelName=${encodeURIComponent(
+            name
+          )}&lat=${latitude}&lng=${longitude}`
         );
         const data = await response.json();
-        setHotelImages((prevImages) => ({
-          ...prevImages,
-          [offer.hotel.hotelId]: data.photos || [],
+        const { photoUrl, rating } = data;
+
+        setHotelData((prevData) => ({
+          ...prevData,
+          [hotelId]: {
+            image: photoUrl,
+            rating: rating,
+          },
         }));
       }
     } catch (error) {
-      console.error("Error fetching hotel images:", error);
+      console.error("Error fetching hotel data:", error);
     }
   };
 
@@ -234,6 +180,7 @@ export default function HotelBookings() {
         hotelOffers.length > 0 ? "h-auto" : "h-full"
       } bg-white text-black`}
     >
+      {/* Header Section */}
       <div className="flex justify-between items-center w-full md:text-xl">
         <div>
           <p className="opacity-50">Discover your</p>
@@ -254,6 +201,8 @@ export default function HotelBookings() {
           />
         </div>
       </div>
+
+      {/* Search and Map Buttons */}
       <div className="flex w-full gap-[15px] mt-4">
         <div className="w-1/2 h-10 bg-[#ebebeb] rounded-[50px] flex items-center gap-2.5 p-2.5">
           <Image
@@ -277,6 +226,7 @@ export default function HotelBookings() {
         </button>
       </div>
 
+      {/* Hotel Type Buttons */}
       <div className="flex justify-between items-center w-full gap-[15px] text-xs md:text-lg md:mt-12 overflow-x-scroll md:overflow-hidden scrollbar mt-4">
         <div className="flex md:flex-col w-max md:w-1/4 h-full">
           <HotelButton label="Hotel" isActive />
@@ -287,9 +237,11 @@ export default function HotelBookings() {
         </div>
       </div>
 
+      {/* Loading and Error Messages */}
       {loading && <p>Loading...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
+      {/* Featured Hotels */}
       {hotelOffers.length > 0 && (
         <div
           className={`grid grid-cols-1 lg:grid-cols-${numFeatured} gap-4 mb-8 mt-6`}
@@ -298,17 +250,17 @@ export default function HotelBookings() {
             .filter((offer) => offer.available)
             .slice(0, numFeatured)
             .map((offer) => {
-              const images = hotelImages[offer.hotel.hotelId] || [];
-              const rating = hotelRatings.find(
-                (r) => r.hotelId === offer.hotel.hotelId
-              );
+              const hotelId = offer.hotel.hotelId;
+              const data = hotelData[hotelId] || {};
+              const image = data.image || "";
+              const rating = data.rating || null;
 
               return (
                 <HotelCard
-                  key={offer.hotel.hotelId}
+                  key={hotelId}
                   offer={offer}
-                  images={images}
-                  rating={rating}
+                  image={image}
+                  rating={rating || 0}
                   featured={true}
                 />
               );
@@ -316,29 +268,31 @@ export default function HotelBookings() {
         </div>
       )}
 
+      {/* Other Hotels */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
         {hotelOffers.length > numFeatured &&
           hotelOffers
             .filter((offer) => offer.available)
             .slice(numFeatured)
             .map((offer) => {
-              const images = hotelImages[offer.hotel.hotelId] || [];
-              const rating = hotelRatings.find(
-                (r) => r.hotelId === offer.hotel.hotelId
-              );
+              const hotelId = offer.hotel.hotelId;
+              const data = hotelData[hotelId] || {};
+              const image = data.image || "";
+              const rating = data.rating || null;
 
               return (
                 <HotelCard
-                  key={offer.hotel.hotelId}
+                  key={hotelId}
                   offer={offer}
-                  images={images}
-                  rating={rating}
+                  image={image}
+                  rating={rating || 0}
                   featured={false}
                 />
               );
             })}
       </div>
 
+      {/* Load More Button */}
       {currentBatch * BATCH_SIZE < allHotelIds?.length && (
         <button
           onClick={fetchNextBatch}
