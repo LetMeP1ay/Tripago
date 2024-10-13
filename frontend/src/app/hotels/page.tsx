@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import HotelButton from "@/components/HotelButton";
 import HotelCard from "@/components/HotelCard";
+import { VscSettings } from "react-icons/vsc";
 
 interface HotelOffer {
   type: string;
@@ -44,6 +45,7 @@ const BATCH_SIZE = 15;
 interface HotelData {
   image: string;
   rating: number;
+  streetAddress: string;
 }
 
 export default function HotelBookings() {
@@ -144,13 +146,14 @@ export default function HotelBookings() {
           )}&lat=${latitude}&lng=${longitude}`
         );
         const data = await response.json();
-        const { photoUrl, rating } = data;
+        const { photoUrl, rating, streetAddress } = data;
 
         setHotelData((prevData) => ({
           ...prevData,
           [hotelId]: {
             image: photoUrl,
             rating: rating,
+            streetAddress: streetAddress,
           },
         }));
       }
@@ -180,7 +183,6 @@ export default function HotelBookings() {
         hotelOffers.length > 0 ? "h-auto" : "h-full"
       } bg-white text-black`}
     >
-      {/* Header Section */}
       <div className="flex justify-between items-center w-full md:text-xl">
         <div>
           <p className="opacity-50">Discover your</p>
@@ -202,7 +204,6 @@ export default function HotelBookings() {
         </div>
       </div>
 
-      {/* Search and Map Buttons */}
       <div className="flex w-full gap-[15px] mt-4">
         <div className="w-1/2 h-10 bg-[#ebebeb] rounded-[50px] flex items-center gap-2.5 p-2.5">
           <Image
@@ -226,9 +227,8 @@ export default function HotelBookings() {
         </button>
       </div>
 
-      {/* Hotel Type Buttons */}
       <div className="flex justify-between items-center w-full gap-[15px] text-xs md:text-lg md:mt-12 overflow-x-scroll md:overflow-hidden scrollbar mt-4">
-        <div className="flex md:flex-col w-max md:w-1/4 h-full">
+        <div className="flex w-max md:w-full h-full">
           <HotelButton label="Hotel" isActive />
           <HotelButton label="Apartments" isActive={false} />
           <HotelButton label="Condo" isActive={false} />
@@ -237,39 +237,47 @@ export default function HotelBookings() {
         </div>
       </div>
 
-      {/* Loading and Error Messages */}
       {loading && <p>Loading...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      {/* Featured Hotels */}
       {hotelOffers.length > 0 && (
-        <div
-          className={`grid grid-cols-1 lg:grid-cols-${numFeatured} gap-4 mb-8 mt-6`}
-        >
-          {hotelOffers
-            .filter((offer) => offer.available)
-            .slice(0, numFeatured)
-            .map((offer) => {
-              const hotelId = offer.hotel.hotelId;
-              const data = hotelData[hotelId] || {};
-              const image = data.image || "";
-              const rating = data.rating || null;
+        <div className="flex w-full overflow-x-scroll md:overflow-hidden scrollbar md:justify-center">
+          <div className="flex gap-4">
+            {hotelOffers
+              .filter((offer) => offer.available)
+              .slice(0, numFeatured)
+              .map((offer) => {
+                const hotelId = offer.hotel.hotelId;
+                const data = hotelData[hotelId] || {};
+                const image = data.image || "";
+                const rating = data.rating || null;
+                const streetAddress = data.streetAddress || "";
 
-              return (
-                <HotelCard
-                  key={hotelId}
-                  offer={offer}
-                  image={image}
-                  rating={rating || 0}
-                  featured={true}
-                />
-              );
-            })}
+                return (
+                  <div key={hotelId} className="flex-shrink-0">
+                    <HotelCard
+                      offer={offer}
+                      streetAddress={streetAddress}
+                      image={image}
+                      rating={rating || 0}
+                      featured={true}
+                    />
+                  </div>
+                );
+              })}
+          </div>
         </div>
       )}
 
-      {/* Other Hotels */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+      <div className="flex w-full justify-between items-center font-Urbanist">
+        <p className="font-bold text-2xl">Hotels Nearby</p>
+        <button className="flex justify-center items-center bg-[#ECECEC] opacity-50 rounded-[50px] p-2 md:p-3 px-2 md:px-8">
+          <p className="sm:pr-1">Filter</p>
+          <VscSettings className="rotate-[90deg] h-6 w-6" />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
         {hotelOffers.length > numFeatured &&
           hotelOffers
             .filter((offer) => offer.available)
@@ -279,10 +287,12 @@ export default function HotelBookings() {
               const data = hotelData[hotelId] || {};
               const image = data.image || "";
               const rating = data.rating || null;
+              const streetAddress = data.streetAddress || "";
 
               return (
                 <HotelCard
                   key={hotelId}
+                  streetAddress={streetAddress}
                   offer={offer}
                   image={image}
                   rating={rating || 0}
@@ -292,7 +302,6 @@ export default function HotelBookings() {
             })}
       </div>
 
-      {/* Load More Button */}
       {currentBatch * BATCH_SIZE < allHotelIds?.length && (
         <button
           onClick={fetchNextBatch}
