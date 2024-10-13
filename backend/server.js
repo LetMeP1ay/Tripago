@@ -36,6 +36,7 @@ const getPlaceData = async (hotelName, lat, lng) => {
 
   try {
     const response = await axios.get(textSeatchUrl);
+    const placeId = response.data.results[0]?.place_id;
     const photoReference = response.data.results[0]?.photos[0]?.photo_reference;
     const photoWidth = response.data.results[0]?.photos[0]?.width;
     const rating = response.data.results[0]?.rating;
@@ -43,7 +44,7 @@ const getPlaceData = async (hotelName, lat, lng) => {
     if (!placeId) {
       throw new Error("Place ID not found.");
     }
-    return rating, photoReference, photoWidth;
+    return { placeId, rating, photoReference, photoWidth };
   } catch (error) {
     console.error("Error fetching Place ID:", error.message);
     throw error;
@@ -64,7 +65,7 @@ const getPhotoReferences = async (placeId) => {
   }
 };
 
-const getPhotoUrl = (photoReference, maxWidth = 400) => {
+const getPhotoUrl = (photoReference, maxWidth) => {
   return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidth}&photoreference=${photoReference}&key=${process.env.PLACES_API_KEY}`;
 };
 
@@ -82,12 +83,31 @@ app.get("/api/hotel-images", async (req, res) => {
         .json({ message: "No photos available for this hotel." });
     }
 
-    const photoUrls = photoReferences.map((ref) => getPhotoUrl(ref));
+    const photoUrls = photoReferences.map((ref) => getPhotoUrl(ref, 400));
 
     res.json({ photos: photoUrls });
   } catch (error) {
     console.error("Error fetching hotel images:", error.message);
     res.status(500).json({ error: "Failed to fetch hotel images." });
+  }
+});
+
+app.get("/api/hotel-data", async (req, res) => {
+  const { hotelName, lat, lng } = req.query;
+
+  try {
+    const { placeId, rating, photoReference, photoWidth } = await getPlaceData(
+      hotelName,
+      lat,
+      lng
+    );
+
+    const photoUrl = getPhotoUrl(photoReference, photoWidth);
+
+    res.json({ placeId, photoUrl, rating });
+  } catch (error) {
+    console.error("Error fetching hotel images:", error.message);
+    res.status(500).json({ error: "Failed to fetch hotel data." });
   }
 });
 
