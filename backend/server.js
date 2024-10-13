@@ -32,19 +32,25 @@ const getPlaceId = async (hotelName, lat, lng) => {
 };
 
 const getPlaceData = async (hotelName, lat, lng) => {
-  const textSeatchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?location=${lat},${lng}&query=${hotelName}&radius=10&key=${process.env.PLACES_API_KEY}`;
+  const textSearchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?location=${lat},${lng}&query=${hotelName}&radius=10&key=${process.env.PLACES_API_KEY}`;
 
   try {
-    const response = await axios.get(textSeatchUrl);
-    const placeId = response.data.results[0]?.place_id;
-    const photoReference = response.data.results[0]?.photos[0]?.photo_reference;
-    const photoWidth = response.data.results[0]?.photos[0]?.width;
-    const rating = response.data.results[0]?.rating;
+    const response = await axios.get(textSearchUrl);
+    const result = response.data.results[0];
 
-    if (!placeId) {
-      throw new Error("Place ID not found.");
+    if (!result) {
+      throw new Error("Place not found.");
     }
-    return { placeId, rating, photoReference, photoWidth };
+
+    const placeId = result.place_id;
+    const photoReference = result.photos?.[0]?.photo_reference;
+    const photoWidth = result.photos?.[0]?.width;
+    const rating = result.rating;
+    const formattedAddress = result.formatted_address;
+
+    const streetAddress = formattedAddress.split(",")[0];
+
+    return { placeId, rating, photoReference, photoWidth, streetAddress };
   } catch (error) {
     console.error("Error fetching Place ID:", error.message);
     throw error;
@@ -96,15 +102,12 @@ app.get("/api/hotel-data", async (req, res) => {
   const { hotelName, lat, lng } = req.query;
 
   try {
-    const { placeId, rating, photoReference, photoWidth } = await getPlaceData(
-      hotelName,
-      lat,
-      lng
-    );
+    const { placeId, rating, photoReference, photoWidth, streetAddress } =
+      await getPlaceData(hotelName, lat, lng);
 
     const photoUrl = getPhotoUrl(photoReference, photoWidth);
 
-    res.json({ placeId, photoUrl, rating });
+    res.json({ placeId, photoUrl, rating, streetAddress });
   } catch (error) {
     console.error("Error fetching hotel images:", error.message);
     res.status(500).json({ error: "Failed to fetch hotel data." });
