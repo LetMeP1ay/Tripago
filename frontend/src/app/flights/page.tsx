@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import axios from "axios";
-import SearchBar from "@/components/SearchBar";
+import FlightSearchBar from "@/components/FlightSearchBar";
 import FlightDetails from "@/components/FlightDetails";
 import { useRouter } from "next/navigation";
 
@@ -150,7 +150,7 @@ export default function FlightSearch() {
         className="flex flex-col w-80 rounded-xl shadow-2xl pt-8 pb-8 p-4 mb-16"
       >
         <div className="pb-[31px]">
-          <SearchBar
+          <FlightSearchBar
             type="text"
             value={origin}
             onChange={(value) => setOrigin(value)}
@@ -158,7 +158,7 @@ export default function FlightSearch() {
         </div>
 
         <div className="pb-[31px]">
-          <SearchBar
+          <FlightSearchBar
             type="text"
             label="To"
             value={destination}
@@ -167,7 +167,7 @@ export default function FlightSearch() {
         </div>
 
         <div className="pb-[31px]">
-          <SearchBar
+          <FlightSearchBar
             type="date"
             label="Departure"
             value={departureDate}
@@ -177,7 +177,7 @@ export default function FlightSearch() {
 
         {tripType === TripType.RoundTrip && (
           <div className="pb-[31px]">
-            <SearchBar
+            <FlightSearchBar
               type="date"
               label="Return"
               value={returnDate}
@@ -188,7 +188,7 @@ export default function FlightSearch() {
 
         <div className="flex flex-row">
           <div className="w-full mr-[4.5px]">
-            <SearchBar
+            <FlightSearchBar
               type="count"
               label="Traveler"
               value={adults}
@@ -197,7 +197,7 @@ export default function FlightSearch() {
           </div>
 
           <div className="w-full ml-[4.5px] pb-[31px]">
-            <SearchBar
+            <FlightSearchBar
               type="dropdown"
               label="Class"
               value={flightClass}

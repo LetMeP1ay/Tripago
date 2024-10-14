@@ -165,6 +165,34 @@ app.get("/api/airport-suggestions", async (req, res) => {
   }
 });
 
+app.get("/api/hotel-suggestions", async (req, res) => {
+  try {
+    const token = await getAccessToken();
+
+    const { keyword, countryCode } = req.query;
+
+    if (!keyword || !countryCode) {
+      return res
+        .status(400)
+        .json({ error: "Missing keyword or cityCode parameter" });
+    }
+
+    const response = await amadeusApiV1.get(
+      `/reference-data/locations/hotel?keyword=${keyword}&subType=HOTEL_LEISURE&subType=HOTEL_GDS&countryCode=${countryCode}&max=5`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    res.json(response.data.data);
+  } catch (error) {
+    console.error("Error fetching hotel suggestions:", error.message);
+    res.status(500).json({ error: "Failed to fetch hotel suggestions" });
+  }
+});
+
 app.get("/api/flights", async (req, res) => {
   try {
     const token = await getAccessToken();

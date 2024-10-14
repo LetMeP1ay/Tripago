@@ -6,6 +6,7 @@ import Image from "next/image";
 import HotelButton from "@/components/HotelButton";
 import HotelCard from "@/components/HotelCard";
 import { VscSettings } from "react-icons/vsc";
+import HotelSearchBar from "@/components/HotelSearchBar";
 
 interface HotelOffer {
   type: string;
@@ -63,6 +64,7 @@ export default function HotelBookings() {
   const [error, setError] = useState<string | null>(null);
   const [allHotelIds, setAllHotelIds] = useState<string[]>([]);
   const [currentBatch, setCurrentBatch] = useState<number>(0);
+  const [countryCode, setCountryCode] = useState<string>("");
 
   const fetchHotelsByCity = async (): Promise<string[]> => {
     try {
@@ -73,6 +75,13 @@ export default function HotelBookings() {
       const hotelIds = data?.data?.map(
         (hotel: { hotelId: string }) => hotel.hotelId
       );
+
+      if (data?.data?.length > 0) {
+        const countryCodeFromResponse =
+          data.data[0]?.address?.countryCode || "";
+        setCountryCode(countryCodeFromResponse);
+      }
+
       return hotelIds;
     } catch (error) {
       console.error("Error fetching hotels by city:", error);
@@ -82,7 +91,7 @@ export default function HotelBookings() {
   };
 
   const fetchHotelOffers = async (hotelIds: string[]) => {
-    if (!cityCode || !checkInDate || hotelIds.length === 0) {
+    if ((!cityCode && hotelIds.length === 0) || !checkInDate) {
       setError("Missing city code, dates, or hotel IDs.");
       return;
     }
@@ -162,6 +171,11 @@ export default function HotelBookings() {
     }
   };
 
+  const handleHotelSelect = async (hotelIds: string[]) => {
+    setHotelOffers([]);
+    await fetchHotelOffers(hotelIds);
+  };
+
   useEffect(() => {
     const fetchOffersInBatches = async () => {
       const hotelIds = await fetchHotelsByCity();
@@ -206,16 +220,9 @@ export default function HotelBookings() {
 
       <div className="flex w-full gap-[15px] mt-4">
         <div className="w-1/2 h-10 bg-[#ebebeb] rounded-[50px] flex items-center gap-2.5 p-2.5">
-          <Image
-            alt="icon"
-            src="/Search.svg"
-            height={20}
-            width={20}
-            className="h-4 w-4 md:h-5 md:w-5"
-          />
-          <input
-            placeholder="Search hotel"
-            className="bg-[#ebebeb] outline-none w-full md:text-xl"
+          <HotelSearchBar
+            countryCode={countryCode}
+            onHotelSelect={handleHotelSelect}
           />
         </div>
 
@@ -277,7 +284,7 @@ export default function HotelBookings() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+      <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
         {hotelOffers.length > numFeatured &&
           hotelOffers
             .filter((offer) => offer.available)
@@ -305,7 +312,7 @@ export default function HotelBookings() {
       {currentBatch * BATCH_SIZE < allHotelIds?.length && (
         <button
           onClick={fetchNextBatch}
-          className="bg-blue-500 text-white rounded-lg p-2 mt-4"
+          className="bg-[#71D1FC] hover:bg-[#5BBEEB] active:bg-[#5AAEEA] transition-all duration-600 ease-in-out text-white rounded-lg p-2 mt-4"
         >
           Load More Hotels
         </button>
