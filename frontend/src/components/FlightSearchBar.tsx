@@ -12,7 +12,7 @@ interface Airport {
   };
 }
 
-interface SearchBarProps {
+interface FlightSearchBarProps {
   type: "text" | "date" | "count" | "dropdown";
   value?: any;
   onChange?: (value: any) => void;
@@ -27,12 +27,12 @@ const toTitleCase = (text: string) => {
     .join(" ");
 };
 
-export default function SearchBar({
+export default function FlightSearchBar({
   label = "From",
   type = "text",
   value = "",
   onChange,
-}: SearchBarProps) {
+}: FlightSearchBarProps) {
   const [query, setQuery] = useState<string>("");
   const [suggestions, setSuggestions] = useState<Airport[]>([]);
   const [selectedAirport, setSelectedAirport] = useState<Airport | null>(null);
