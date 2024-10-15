@@ -250,7 +250,7 @@ export default function FlightSearch() {
                   )
                 }
               >
-                Select
+                Add to Cart
               </button>
             </div>
           ))}

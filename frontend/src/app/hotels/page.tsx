@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import HotelButton from "@/components/HotelButton";
@@ -60,6 +60,7 @@ export default function HotelBookings() {
   >({});
 
   const [hotelOffers, setHotelOffers] = useState<HotelOffer[]>([]);
+  const [addressInput, setAddressInput] = useState<string>("");
   const [hotelData, setHotelData] = useState<Record<string, HotelData>>({});
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,6 +83,7 @@ export default function HotelBookings() {
     setSortBy(sortOption);
     setIsFilterDropdownOpen(false);
   };
+
   const handleFilterClick = (filterLabel: string) => {
     setSelectedFilter(filterLabel);
 
@@ -123,7 +125,7 @@ export default function HotelBookings() {
     setCurrentBatch(0);
 
     let batchNumber = 0;
-    const totalBatches = Math.ceil(hotelIds.length / BATCH_SIZE);
+    const totalBatches = Math.ceil(hotelIds?.length / BATCH_SIZE);
 
     while (
       batchNumber < totalBatches &&
@@ -131,7 +133,7 @@ export default function HotelBookings() {
     ) {
       const startIndex = batchNumber * BATCH_SIZE;
       const endIndex = startIndex + BATCH_SIZE;
-      const batchHotelIds = hotelIds.slice(startIndex, endIndex);
+      const batchHotelIds = hotelIds?.slice(startIndex, endIndex);
 
       await fetchHotelOffers(batchHotelIds, extraParams);
       setCurrentBatch((prevBatch) => prevBatch + 1);
@@ -279,6 +281,25 @@ export default function HotelBookings() {
     return offers;
   }, [nonFeaturedOffers, hotelData, sortBy]);
 
+  const filteredNonFeaturedOffers = useMemo(() => {
+    return sortedNonFeaturedOffers.filter((offer) => {
+      const hotelId = offer.hotel.hotelId;
+      const data = hotelData[hotelId];
+
+      if (!data || !data.streetAddress) {
+        return false;
+      }
+
+      if (addressInput.trim() === "") {
+        return true;
+      }
+
+      return data.streetAddress
+        .toLowerCase()
+        .includes(addressInput.toLowerCase());
+    });
+  }, [sortedNonFeaturedOffers, hotelData, addressInput]);
+
   const fetchHotelDataForHotels = async (hotelOffers: HotelOffer[]) => {
     try {
       for (let offer of hotelOffers) {
@@ -389,14 +410,18 @@ export default function HotelBookings() {
         <div className="px-[15px] py-2.5 bg-white rounded-[50px] border-2 border-black/10 flex items-center w-1/2">
           <input
             className="text-black/50 text-xs md:text-xl font-bold w-full outline-none"
-            placeholder="211B Baker Street"
+            placeholder="Search by address"
+            value={addressInput}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setAddressInput(e.target.value)
+            }
           />
           <Image
             alt="icon"
             src="/Arrow.svg"
             height={20}
             width={20}
-            className="h-3 w-3 md:h-5 md:w-5"
+            className="h-3 w-3 md:h-5 md:w-5 rotate-90"
           />
         </div>
       </div>
@@ -529,9 +554,9 @@ export default function HotelBookings() {
           )}
         </div>
       </div>
-      {sortedNonFeaturedOffers.length > 0 && (
+      {filteredNonFeaturedOffers.length > 0 && (
         <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-          {sortedNonFeaturedOffers.map((offer) => {
+          {filteredNonFeaturedOffers.map((offer) => {
             const hotelId = offer.hotel.hotelId;
             const data = hotelData[hotelId] || {};
             const image = data.image || "";
