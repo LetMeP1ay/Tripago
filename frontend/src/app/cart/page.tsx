@@ -87,21 +87,26 @@ export default function ShoppingCart() {
         <p className="font-medium">Order Details</p>
         <p></p>
       </div>
-      <div className="flex w-full justify-center items-center text-center py-4 mt-8 mb-8 bg-[#FDE6EB] text-[#EE3D60]">
-        <Image
-          alt="icon"
-          src="/Timer.svg"
-          height={20}
-          width={20}
-          className="w-6 h-6"
-        />
-        <p className="pl-4 font-light">
-          The remaining time of order: <b className="font-bold">{formatTime(timeLeft)}</b>
-        </p>
-      </div>
-      <p className="font-medium md:px-20 md:text-3xl">Your Trip</p>
+      {cartItems.length > 0 && (
+        <>
+          <div className="flex w-full justify-center items-center text-center py-4 mt-8 mb-8 bg-[#FDE6EB] text-[#EE3D60]">
+            <Image
+              alt="icon"
+              src="/Timer.svg"
+              height={20}
+              width={20}
+              className="w-6 h-6"
+            />
+            <p className="pl-4 font-light">
+              The remaining time of order:{" "}
+              <b className="font-bold">{formatTime(timeLeft)}</b>
+            </p>
+          </div>
+          <p className="font-medium md:px-20 md:text-3xl">Your Trip</p>
+        </>
+      )}
       {cartItems.length === 0 ? (
-        <p className="mt-4 text-center">Your cart is empty.</p>
+        <p className="mt-96 text-center text-3xl">Your cart is empty.</p>
       ) : (
         <div className="mt-4">
           {cartItems
@@ -158,7 +163,9 @@ export default function ShoppingCart() {
                 ${totalPrice}{" "}
                 <p className="text-[#8C8D89] font-light">Total Price</p>
               </p>
-              <button className="bg-[#1C6AE4] p-4 text-white rounded-sm font-medium">Proceed to Payment</button>
+              <button className="bg-[#1C6AE4] hover:bg-[#0B54FF] active:bg-[#0A32FF] p-4 text-white rounded-sm font-medium transition-all duration-600 ease-in-out">
+                Proceed to Payment
+              </button>
             </div>
           )}
         </div>

@@ -17,6 +17,7 @@ import { VscSettings } from "react-icons/vsc";
 import { CartItem } from "@/types";
 import { AuthContext } from "@/context/AuthContext";
 import { CartContext } from "@/context/CartContext";
+import NotificationPopup from "@/components/NotificationPopup";
 
 interface HotelOffer {
   type: string;
@@ -82,6 +83,7 @@ export default function HotelBookings() {
   const [sortBy, setSortBy] = useState<string>("price");
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] =
     useState<boolean>(false);
+  const [showNotification, setShowNotification] = useState(false);
 
   const numFeatured = 3;
   const nonFeaturedOffers = hotelOffers.slice(numFeatured);
@@ -121,6 +123,7 @@ export default function HotelBookings() {
     };
 
     addToCart(cartItem);
+    setShowNotification(true);
   };
 
   const handleFilterClick = (filterLabel: string) => {
@@ -464,7 +467,6 @@ export default function HotelBookings() {
           />
         </div>
       </div>
-
       <div className="flex w-full gap-[15px] mt-4">
         <div className="w-1/2 h-10 bg-[#ebebeb] rounded-[50px] flex items-center gap-2.5 p-2.5">
           <HotelSearchBar
@@ -480,7 +482,6 @@ export default function HotelBookings() {
           <p className="w-full text-center opacity-50">Open Map</p>
         </button>
       </div>
-
       <div className="flex justify-between items-center w-full gap-[15px] text-xs md:text-lg md:mt-12 overflow-x-scroll md:overflow-hidden scrollbar mt-4">
         <div className="flex w-max md:w-full h-full">
           {["Hotel", "Apartments", "Condo", "Mansion"].map((label) => (
@@ -493,10 +494,8 @@ export default function HotelBookings() {
           ))}
         </div>
       </div>
-
       {loading && <p>Loading...</p>}
       {error && <p className="text-red-500">{error}</p>}
-
       {hotelOffers.length > 0 && (
         <div className="flex w-full overflow-x-scroll md:overflow-hidden scrollbar md:justify-center">
           <div className="flex gap-4">
@@ -511,7 +510,19 @@ export default function HotelBookings() {
                 const streetAddress = data.streetAddress || "";
 
                 return (
-                  <div key={hotelId} className="flex-shrink-0">
+                  <div
+                    key={hotelId}
+                    className="flex-shrink-0 cursor-pointer"
+                    onClick={() =>
+                      handleAddToCart(
+                        offer,
+                        image,
+                        streetAddress,
+                        false,
+                        rating || 0
+                      )
+                    }
+                  >
                     <HotelCard
                       offer={offer}
                       streetAddress={streetAddress}
@@ -525,7 +536,6 @@ export default function HotelBookings() {
           </div>
         </div>
       )}
-
       <div className="flex w-full justify-between items-center font-Urbanist">
         <p className="font-bold text-2xl">Hotels Nearby</p>
         <div className="relative inline-block text-left">
@@ -632,7 +642,6 @@ export default function HotelBookings() {
           })}
         </div>
       )}
-
       {currentBatch * BATCH_SIZE < allHotelIds?.length && (
         <button
           onClick={fetchNextBatch}
@@ -640,7 +649,12 @@ export default function HotelBookings() {
         >
           Load More Hotels
         </button>
-      )}
+      )}{" "}
+      <NotificationPopup
+        message="Hotel added to cart successfully!"
+        onClose={() => setShowNotification(false)}
+        show={showNotification}
+      />
     </div>
   );
 }
