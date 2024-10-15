@@ -37,6 +37,8 @@ export default function Stripe() {
               <span className="text-2xl font-bold">${amount}</span>
             </div>
           </div>
+
+          {/* Animated dropdown */}
           <div
             className={`transition-all duration-500 ease-in-out overflow-hidden ${
               showDetails ? "max-h-96" : "max-h-0"
