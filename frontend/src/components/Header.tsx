@@ -3,9 +3,12 @@
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import NavButton from "@/components/NavButton";
 import NotificationBell from "@/components/NotificationBell";
+import { AuthContext } from "@/context/AuthContext";
+import { signOut } from "firebase/auth";
+import { auth } from "../../firebase-config";
 
 function useWindowWidth() {
   const [windowWidth, setWindowWidth] = useState<number>(0);
@@ -31,6 +34,7 @@ export default function Header() {
   const windowWidth = useWindowWidth();
   const isDesktop = windowWidth >= 768;
 
+  const { user } = useContext(AuthContext);
   const [activeButton, setActiveButton] = useState<string>("");
   const [screenLoaded, setScreenLoaded] = useState<boolean>(false);
 
@@ -41,13 +45,9 @@ export default function Header() {
       setActiveButton("Food");
     } else if (pathname.includes("/hotels")) {
       setActiveButton("Hotels");
-    } else if (pathname.includes("/signup")) {
-      setActiveButton("Signup");
     } else if (pathname.includes("/cart")) {
       setActiveButton("Cart");
-    } else if (pathname.includes("/login")) {
-      setActiveButton("Login");
-    } else if (pathname.includes("/")) {
+    } else if (pathname === "/") {
       setActiveButton("Map");
     } else {
       setActiveButton("");
@@ -83,7 +83,7 @@ export default function Header() {
               height={0}
               className="w-24 hover:cursor-pointer"
               onClick={() => router.push("/")}
-            />
+            />{" "}
             {!isDesktop && <NotificationBell />}
           </div>
           {!(pathname.includes("/cart") && !isDesktop) && (
@@ -122,18 +122,33 @@ export default function Header() {
                 isActive={activeButton === "Cart"}
                 onClick={() => router.push("/cart")}
               />
-              <NavButton
-                type="text"
-                label="Signup"
-                isActive={activeButton === "Signup"}
-                onClick={() => router.push("/signup")}
-              />
-              <NavButton
-                type="text"
-                label="Login"
-                isActive={activeButton === "Login"}
-                onClick={() => router.push("/login")}
-              />
+              {user ? (
+                <>
+                  <NavButton
+                    type="text"
+                    label="Logout"
+                    isActive={activeButton === "Logout"}
+                    onClick={async () => {
+                      await signOut(auth);
+                    }}
+                  />
+                </>
+              ) : (
+                <>
+                  <NavButton
+                    type="text"
+                    label="Signup"
+                    isActive={activeButton === "Signup"}
+                    onClick={() => router.push("/signup")}
+                  />
+                  <NavButton
+                    type="text"
+                    label="Login"
+                    isActive={activeButton === "Login"}
+                    onClick={() => router.push("/login")}
+                  />
+                </>
+              )}
               <NotificationBell />
             </div>
           )}
