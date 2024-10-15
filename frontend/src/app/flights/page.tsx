@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 import axios from "axios";
 import FlightSearchBar from "@/components/FlightSearchBar";
 import FlightDetails from "@/components/FlightDetails";
 import { useRouter } from "next/navigation";
+import { AuthContext } from "@/context/AuthContext";
+import { CartContext } from "@/context/CartContext";
 
 enum TripType {
   RoundTrip = "1",
@@ -33,6 +35,8 @@ export default function FlightSearch() {
   const [loading, setLoading] = useState(false);
   const [sortBy, setSortBy] = useState<string | undefined>(undefined);
   const router = useRouter();
+  const { user } = useContext(AuthContext);
+  const { addToCart } = useContext(CartContext);
 
   const formatDuration = (duration: string) => {
     const hoursMatch = duration.match(/(\d+)H/);
@@ -42,6 +46,21 @@ export default function FlightSearch() {
     const minutes = Number(minutesMatch ? minutesMatch[1] : 0);
 
     return Number(hours * 60 + minutes);
+  };
+
+  const handleAddToCart = (flight: any) => {
+    if (!user) {
+      alert("Please log in to add items to your cart.");
+      return;
+    }
+    const cartItem = {
+      id: flight.id,
+      flight,
+      carriers: results.dictionaries.carriers,
+      aircraft: results.dictionaries.aircraft,
+    };
+
+    addToCart(cartItem);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

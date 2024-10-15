@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { AuthProvider } from "@/context/AuthContext";
+import { CartProvider } from "@/context/CartContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,13 +23,17 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="Logo.svg" />
       </head>
-      <body
-        className={`${inter.className} flex flex-col min-h-screen bg-white text-black overflow-hidden`}
-      >
-        <Header />
-        <main className="flex-grow">{children}</main>
-        <Footer />
-      </body>
+      <AuthProvider>
+        <CartProvider>
+          <body
+            className={`${inter.className} flex flex-col min-h-screen bg-white text-black overflow-hidden`}
+          >
+            <Header />
+            <main className="flex-grow">{children}</main>
+            <Footer />
+          </body>
+        </CartProvider>
+      </AuthProvider>
     </html>
   );
 }

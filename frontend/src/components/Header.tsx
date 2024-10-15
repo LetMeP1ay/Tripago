@@ -41,12 +41,12 @@ export default function Header() {
       setActiveButton("Food");
     } else if (pathname.includes("/hotels")) {
       setActiveButton("Hotels");
-    } else if (pathname.includes("/favorites")) {
-      setActiveButton("Favorites");
+    } else if (pathname.includes("/signup")) {
+      setActiveButton("Signup");
     } else if (pathname.includes("/cart")) {
       setActiveButton("Cart");
-    } else if (pathname.includes("/profile")) {
-      setActiveButton("Profile");
+    } else if (pathname.includes("/login")) {
+      setActiveButton("Login");
     } else if (pathname.includes("/")) {
       setActiveButton("Map");
     } else {
@@ -118,21 +118,21 @@ export default function Header() {
               />
               <NavButton
                 type="text"
-                label="Favorites"
-                isActive={activeButton === "Favorites"}
-                onClick={() => router.push("/favorites")}
-              />
-              <NavButton
-                type="text"
                 label="Cart"
                 isActive={activeButton === "Cart"}
                 onClick={() => router.push("/cart")}
               />
               <NavButton
                 type="text"
-                label="Profile"
-                isActive={activeButton === "Profile"}
-                onClick={() => router.push("/profile")}
+                label="Signup"
+                isActive={activeButton === "Signup"}
+                onClick={() => router.push("/signup")}
+              />
+              <NavButton
+                type="text"
+                label="Login"
+                isActive={activeButton === "Login"}
+                onClick={() => router.push("/login")}
               />
               <NotificationBell />
             </div>
