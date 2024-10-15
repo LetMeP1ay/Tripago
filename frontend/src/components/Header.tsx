@@ -130,6 +130,7 @@ export default function Header() {
                     isActive={activeButton === "Logout"}
                     onClick={async () => {
                       await signOut(auth);
+                      router.push("/");
                     }}
                   />
                 </>

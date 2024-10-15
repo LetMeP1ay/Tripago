@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { CartItem, CartContextType } from "../types/index";
+import { CartItem, CartContextType } from "../types";
 import { AuthContext } from "./AuthContext";
 import { db } from "../../firebase-config";
 import { doc, setDoc, getDoc, onSnapshot } from "firebase/firestore";
@@ -17,47 +17,73 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { user } = useContext(AuthContext);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-
-  const fetchCart = async (uid: string) => {
-    const cartRef = doc(db, "carts", uid);
-    const cartSnap = await getDoc(cartRef);
-
-    if (cartSnap.exists()) {
-      const data = cartSnap.data();
-      setCartItems(data.cartItems || []);
-    }
-  };
-
-  const saveCart = async (uid: string, items: CartItem[]) => {
-    const cartRef = doc(db, "carts", uid);
-    await setDoc(cartRef, { cartItems: items }, { merge: true });
-  };
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
-    if (user) {
-      fetchCart(user.uid);
-      const cartRef = doc(db, "carts", user.uid);
-      const unsubscribe = onSnapshot(cartRef, (docSnap) => {
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setCartItems(data.cartItems || []);
-        }
-      });
-      return () => unsubscribe();
-    } else {
-      setCartItems([]);
-    }
+    let unsubscribe: () => void;
+
+    const fetchCart = async () => {
+      if (user) {
+        const cartRef = doc(db, "carts", user.uid);
+
+        unsubscribe = onSnapshot(
+          cartRef,
+          (docSnap) => {
+            if (docSnap.exists()) {
+              const data = docSnap.data();
+              setCartItems(data.cartItems || []);
+            } else {
+              setCartItems([]);
+            }
+            setIsInitialLoad(false);
+          },
+          (error) => {
+            console.error("Error fetching cart data:", error);
+          }
+        );
+      } else {
+        setCartItems([]);
+        setIsInitialLoad(false);
+      }
+    };
+
+    fetchCart();
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, [user]);
 
   useEffect(() => {
-    if (user) {
-      saveCart(user.uid, cartItems);
-    }
-  }, [cartItems, user]);
+    const saveCartToFirestore = async () => {
+      if (user && !isInitialLoad) {
+        try {
+          const cartRef = doc(db, "carts", user.uid);
+
+          const cartSnap = await getDoc(cartRef);
+          const currentData = cartSnap.exists()
+            ? cartSnap.data().cartItems || []
+            : [];
+
+          if (JSON.stringify(currentData) !== JSON.stringify(cartItems)) {
+            await setDoc(cartRef, { cartItems }, { merge: true });
+          }
+        } catch (error) {
+          console.error("Error saving cart data:", error);
+        }
+      }
+    };
+
+    saveCartToFirestore();
+  }, [cartItems]);
 
   const addToCart = (item: CartItem) => {
     setCartItems((prevItems) => {
-      const itemExists = prevItems.some((prevItem) => prevItem.id === item.id);
+      const itemExists = prevItems.some(
+        (prevItem) => prevItem.id === item.id && prevItem.type === item.type
+      );
       if (!itemExists) {
         return [...prevItems, item];
       }
@@ -65,8 +91,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   };
 
-  const removeFromCart = (id: string) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
+  const removeFromCart = (id: string, type: "flight" | "hotel") => {
+    setCartItems((prevItems) =>
+      prevItems.filter((item) => !(item.id === id && item.type === type))
+    );
   };
 
   return (

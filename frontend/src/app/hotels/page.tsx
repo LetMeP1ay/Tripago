@@ -1,12 +1,22 @@
 "use client";
 
-import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ChangeEvent,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import HotelButton from "@/components/HotelButton";
 import HotelCard from "@/components/HotelCard";
 import HotelSearchBar from "@/components/HotelSearchBar";
 import { VscSettings } from "react-icons/vsc";
+import { CartItem } from "@/types";
+import { AuthContext } from "@/context/AuthContext";
+import { CartContext } from "@/context/CartContext";
 
 interface HotelOffer {
   type: string;
@@ -58,6 +68,8 @@ export default function HotelBookings() {
   const [additionalQueryParams, setAdditionalQueryParams] = useState<
     Record<string, string>
   >({});
+  const { user } = useContext(AuthContext);
+  const { addToCart } = useContext(CartContext);
 
   const [hotelOffers, setHotelOffers] = useState<HotelOffer[]>([]);
   const [addressInput, setAddressInput] = useState<string>("");
@@ -82,6 +94,33 @@ export default function HotelBookings() {
   const handleSortChange = (sortOption: string) => {
     setSortBy(sortOption);
     setIsFilterDropdownOpen(false);
+  };
+
+  const handleAddToCart = (
+    offer: HotelOffer,
+    image: string,
+    streetAddress: string,
+    featured: boolean,
+    rating?: number
+  ) => {
+    if (!user) {
+      alert("Please log in to add items to your cart.");
+      return;
+    }
+
+    const cartItem: CartItem = {
+      id: offer.hotel.hotelId,
+      type: "hotel",
+      hotel: {
+        offer,
+        image,
+        streetAddress,
+        featured,
+        rating,
+      },
+    };
+
+    addToCart(cartItem);
   };
 
   const handleFilterClick = (filterLabel: string) => {
@@ -560,18 +599,35 @@ export default function HotelBookings() {
             const hotelId = offer.hotel.hotelId;
             const data = hotelData[hotelId] || {};
             const image = data.image || "";
-            const rating = data.rating || null;
+            const rating = Number(data.rating) || 0;
             const streetAddress = data.streetAddress || "";
 
             return (
-              <HotelCard
-                key={hotelId}
-                streetAddress={streetAddress}
-                offer={offer}
-                image={image}
-                rating={rating || 0}
-                featured={false}
-              />
+              <div key={hotelId}>
+                <HotelCard
+                  streetAddress={streetAddress}
+                  offer={offer}
+                  image={image}
+                  rating={rating || 0}
+                  featured={false}
+                />
+                <div className="w-full flex justify-end items-center">
+                  <button
+                    className="w-1/4 rounded-lg bg-[#71D1FC] mb-8 p-3 text-sm font-medium text-white transition-all duration-600 ease-in-out hover:bg-[#5BBEEB] active:bg-[#4DAED3] ml-auto"
+                    onClick={() =>
+                      handleAddToCart(
+                        offer,
+                        image,
+                        streetAddress,
+                        false,
+                        rating || 0
+                      )
+                    }
+                  >
+                    Add to Cart
+                  </button>
+                </div>
+              </div>
             );
           })}
         </div>
