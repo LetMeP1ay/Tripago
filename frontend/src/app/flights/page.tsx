@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { AuthContext } from "@/context/AuthContext";
 import { CartContext } from "@/context/CartContext";
 import { CartItem } from "@/types";
+import NotificationPopup from "@/components/NotificationPopup";
 
 enum TripType {
   RoundTrip = "1",
@@ -33,8 +34,11 @@ export default function FlightSearch() {
     FlightClass.Economy
   );
   const [results, setResults] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<string | undefined>(undefined);
+  const [showNotification, setShowNotification] = useState<boolean>(false);
+  const [confirmChoiceId, setConfirmChoiceId] = useState(null);
+
   const router = useRouter();
   const { user } = useContext(AuthContext);
   const { addToCart } = useContext(CartContext);
@@ -65,6 +69,7 @@ export default function FlightSearch() {
     };
 
     addToCart(cartItem);
+    setShowNotification(true);
   };
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -166,7 +171,6 @@ export default function FlightSearch() {
           Multi-City
         </button>
       </div>
-
       <form
         onSubmit={handleSubmit}
         className="flex flex-col w-80 rounded-xl shadow-2xl pt-8 pb-8 p-4 mb-16"
@@ -235,9 +239,7 @@ export default function FlightSearch() {
           Search
         </button>
       </form>
-
       {loading && <p>Looking for tickets...</p>}
-
       {results && (
         <div className="w-full lg:w-auto p-4 flex flex-col items-end justify-center">
           <div className="flex justify-end mb-4">
@@ -259,26 +261,54 @@ export default function FlightSearch() {
                 carriers={results.dictionaries.carriers}
                 aircraft={results.dictionaries.aircraft}
               />
-              <button
-                className="rounded-lg bg-[#71D1FC] mb-8 w-full lg:w-1/6 p-3 text-sm font-medium text-white transition-all duration-600 ease-in-out hover:bg-[#5BBEEB] active:bg-[#4DAED3] ml-auto"
-                onClick={() => {
-                  handleSelectTicket(
-                    flight.itineraries[0].segments[
-                      flight.itineraries[0].segments.length - 1
-                    ].arrival.iataCode,
-                    flight.itineraries[0].segments[
-                      flight.itineraries[0].segments.length - 1
-                    ].arrival.at
-                  );
-                  handleAddToCart(flight);
-                }}
-              >
-                Add to Cart
-              </button>
+              {confirmChoiceId !== flight.id ? (
+                <button
+                  className="rounded-lg bg-[#71D1FC] mb-8 w-full lg:w-1/6 p-3 text-sm font-medium text-white transition-all duration-600 ease-in-out hover:bg-[#5BBEEB] active:bg-[#4DAED3] ml-auto"
+                  onClick={() => setConfirmChoiceId(flight.id)}
+                >
+                  Add to Cart
+                </button>
+              ) : (
+                <div className="flex flex-col items-center mb-8">
+                  <p className="mb-2">Would you like to select a hotel?</p>
+                  <div className="flex space-x-2">
+                    <button
+                      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                      onClick={() => {
+                        handleAddToCart(flight);
+                        handleSelectTicket(
+                          flight.itineraries[0].segments[
+                            flight.itineraries[0].segments.length - 1
+                          ].arrival.iataCode,
+                          flight.itineraries[0].segments[
+                            flight.itineraries[0].segments.length - 1
+                          ].arrival.at
+                        );
+                      }}
+                    >
+                      Yes
+                    </button>
+                    <button
+                      className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                      onClick={() => {
+                        handleAddToCart(flight);
+                        setConfirmChoiceId(null);
+                      }}
+                    >
+                      No
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
+      <NotificationPopup
+        message="Flight added to cart successfully!"
+        onClose={() => setShowNotification(false)}
+        show={showNotification}
+      />
     </div>
   );
 }
