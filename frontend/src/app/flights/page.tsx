@@ -7,6 +7,7 @@ import FlightDetails from "@/components/FlightDetails";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "@/context/AuthContext";
 import { CartContext } from "@/context/CartContext";
+import { CartItem } from "@/types";
 
 enum TripType {
   RoundTrip = "1",
@@ -53,16 +54,18 @@ export default function FlightSearch() {
       alert("Please log in to add items to your cart.");
       return;
     }
-    const cartItem = {
+    const cartItem: CartItem = {
       id: flight.id,
-      flight,
-      carriers: results.dictionaries.carriers,
-      aircraft: results.dictionaries.aircraft,
+      type: "flight",
+      flight: {
+        flightData: flight,
+        carriers: results.dictionaries.carriers,
+        aircraft: results.dictionaries.aircraft,
+      },
     };
 
     addToCart(cartItem);
   };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -258,7 +261,7 @@ export default function FlightSearch() {
               />
               <button
                 className="rounded-lg bg-[#71D1FC] mb-8 w-full lg:w-1/6 p-3 text-sm font-medium text-white transition-all duration-600 ease-in-out hover:bg-[#5BBEEB] active:bg-[#4DAED3] ml-auto"
-                onClick={() =>
+                onClick={() => {
                   handleSelectTicket(
                     flight.itineraries[0].segments[
                       flight.itineraries[0].segments.length - 1
@@ -266,8 +269,9 @@ export default function FlightSearch() {
                     flight.itineraries[0].segments[
                       flight.itineraries[0].segments.length - 1
                     ].arrival.at
-                  )
-                }
+                  );
+                  handleAddToCart(flight);
+                }}
               >
                 Add to Cart
               </button>
