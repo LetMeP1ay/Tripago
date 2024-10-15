@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import FlightDetails from "@/components/FlightDetails";
 import HotelCard from "@/components/HotelCard";
 import { CartContext } from "@/context/CartContext";
@@ -18,6 +18,31 @@ export default function ShoppingCart() {
     const secs = seconds % 60;
     return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
   };
+
+  const totalPrice = useMemo(() => {
+    let total = 0;
+    cartItems.forEach((item) => {
+      if (item.type === "flight" && item.flight) {
+        const price = parseFloat(item.flight.flightData.price.total);
+        if (!isNaN(price)) {
+          total += price;
+        }
+      } else if (item.type === "hotel" && item.hotel) {
+        if (
+          item.hotel.offer.offers &&
+          item.hotel.offer.offers.length > 0 &&
+          item.hotel.offer.offers[0].price &&
+          item.hotel.offer.offers[0].price.total
+        ) {
+          const price = parseFloat(item.hotel.offer.offers[0].price.total);
+          if (!isNaN(price)) {
+            total += price;
+          }
+        }
+      }
+    });
+    return total.toFixed(2);
+  }, [cartItems]);
 
   useEffect(() => {
     setTimeLeft(600);
@@ -70,8 +95,8 @@ export default function ShoppingCart() {
           width={20}
           className="w-6 h-6"
         />
-        <p className="pl-4">
-          The remaining time of order: <b>{formatTime(timeLeft)}</b>
+        <p className="pl-4 font-light">
+          The remaining time of order: <b className="font-bold">{formatTime(timeLeft)}</b>
         </p>
       </div>
       <p className="font-medium md:px-20 md:text-3xl">Your Trip</p>
@@ -126,6 +151,16 @@ export default function ShoppingCart() {
                 </div>
               </div>
             ))}
+
+          {cartItems.length > 0 && (
+            <div className="flex justify-between items-center mb-20 pt-6 md:px-20 w-full border-t md:text-xl">
+              <p className="text-[#1C6AE4] font-bold">
+                ${totalPrice}{" "}
+                <p className="text-[#8C8D89] font-light">Total Price</p>
+              </p>
+              <button className="bg-[#1C6AE4] p-4 text-white rounded-sm font-medium">Proceed to Payment</button>
+            </div>
+          )}
         </div>
       )}
     </div>
