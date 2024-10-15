@@ -271,7 +271,7 @@ app.get("/api/hotel-offers", async (req, res) => {
       roomQuantity,
       priceRange,
       currency = "USD",
-      includeClosed = true,
+      includeClosed = false,
       bestRateOnly = true,
     } = req.query;
 

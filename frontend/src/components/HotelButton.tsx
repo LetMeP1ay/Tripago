@@ -3,9 +3,14 @@
 interface HotelButtonProprs {
   label: string;
   isActive: boolean;
+  onClick: () => void;
 }
 
-export default function HotelButton({ label, isActive }: HotelButtonProprs) {
+export default function HotelButton({
+  label,
+  isActive,
+  onClick,
+}: HotelButtonProprs) {
   return (
     <button
       className={
@@ -14,6 +19,7 @@ export default function HotelButton({ label, isActive }: HotelButtonProprs) {
           ? `text-white bg-[#71D1FC] hover:bg-[#5BBEEB] active:bg-[#5AAEEA]`
           : `text-[#727272] bg-[#ebebeb]  hover:bg-[#DADADA] active:bg-[#BBB]`)
       }
+      onClick={onClick}
     >
       <p>{label}</p>
     </button>
