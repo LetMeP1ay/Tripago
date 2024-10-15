@@ -65,7 +65,7 @@ export default function Footer() {
           height={0}
           width={0}
           className="w-6 h-6 md:w-8 md:h-8 hover:cursor-pointer"
-          onClick={() => router.push("/profile")}
+          onClick={() => router.push("/login")}
         />
       </div>
     </footer>
