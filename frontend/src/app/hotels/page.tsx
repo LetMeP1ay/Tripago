@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import HotelButton from "@/components/HotelButton";
 import HotelCard from "@/components/HotelCard";
-import { VscSettings } from "react-icons/vsc";
 import HotelSearchBar from "@/components/HotelSearchBar";
+import { VscSettings } from "react-icons/vsc";
 
 interface HotelOffer {
   type: string;
@@ -52,11 +52,12 @@ interface HotelData {
 export default function HotelBookings() {
   const router = useRouter();
 
-  const query = new URLSearchParams(window.location.search);
-  const cityCode = query.get("cityCode") || "";
-  const checkInDate = query.get("checkInDate") || "";
-  const checkOutDate = query.get("checkOutDate") || "";
-  const adults = query.get("adults") || "1";
+  const hotelOffersRef = useRef<HotelOffer[]>([]);
+  const hotelDataRef = useRef<Record<string, HotelData>>({});
+  const [selectedFilter, setSelectedFilter] = useState<string>("Hotel");
+  const [additionalQueryParams, setAdditionalQueryParams] = useState<
+    Record<string, string>
+  >({});
 
   const [hotelOffers, setHotelOffers] = useState<HotelOffer[]>([]);
   const [hotelData, setHotelData] = useState<Record<string, HotelData>>({});
@@ -65,6 +66,94 @@ export default function HotelBookings() {
   const [allHotelIds, setAllHotelIds] = useState<string[]>([]);
   const [currentBatch, setCurrentBatch] = useState<number>(0);
   const [countryCode, setCountryCode] = useState<string>("");
+  const [sortBy, setSortBy] = useState<string>("price");
+  const [isFilterDropdownOpen, setIsFilterDropdownOpen] =
+    useState<boolean>(false);
+
+  const numFeatured = 3;
+  const nonFeaturedOffers = hotelOffers.slice(numFeatured);
+  const query = new URLSearchParams(window.location.search);
+  const cityCode = query.get("cityCode") || "";
+  const checkInDate = query.get("checkInDate") || "";
+  const checkOutDate = query.get("checkOutDate") || "";
+  const adults = query.get("adults") || "1";
+
+  const handleSortChange = (sortOption: string) => {
+    setSortBy(sortOption);
+    setIsFilterDropdownOpen(false);
+  };
+  const handleFilterClick = (filterLabel: string) => {
+    setSelectedFilter(filterLabel);
+
+    let queryParams: Record<string, string> = {};
+
+    switch (filterLabel) {
+      case "Hotel":
+        queryParams = { bestRateOnly: "true" };
+        break;
+      case "Apartments":
+        queryParams = { roomQuantity: "1", priceRange: "50-150" };
+        break;
+      case "Condo":
+        queryParams = { roomQuantity: "2", priceRange: "150-300" };
+        break;
+      case "Mansion":
+        queryParams = { roomQuantity: "3", priceRange: "300-1000" };
+        break;
+      default:
+        queryParams = {};
+    }
+
+    setAdditionalQueryParams(queryParams);
+
+    setHotelOffers([]);
+    setHotelData({});
+    setCurrentBatch(0);
+    hotelOffersRef.current = [];
+    hotelDataRef.current = {};
+
+    fetchOffersWithFilters(queryParams);
+  };
+
+  const fetchOffersWithFilters = async (
+    extraParams: Record<string, string>
+  ) => {
+    const hotelIds = await fetchHotelsByCity();
+    setAllHotelIds(hotelIds);
+    setCurrentBatch(0);
+
+    let batchNumber = 0;
+    const totalBatches = Math.ceil(hotelIds.length / BATCH_SIZE);
+
+    while (
+      batchNumber < totalBatches &&
+      (!hasEnoughFeatured() || !hasEnoughNonFeatured())
+    ) {
+      const startIndex = batchNumber * BATCH_SIZE;
+      const endIndex = startIndex + BATCH_SIZE;
+      const batchHotelIds = hotelIds.slice(startIndex, endIndex);
+
+      await fetchHotelOffers(batchHotelIds, extraParams);
+      setCurrentBatch((prevBatch) => prevBatch + 1);
+
+      batchNumber++;
+    }
+  };
+
+  const sortByDisplayName = (sortOption: string) => {
+    switch (sortOption) {
+      case "price":
+        return "Price";
+      case "rating":
+        return "Rating";
+      case "name":
+        return "Name (A-Z)";
+      case "name_desc":
+        return "Name (Z-A)";
+      default:
+        return "Select";
+    }
+  };
 
   const fetchHotelsByCity = async (): Promise<string[]> => {
     try {
@@ -90,8 +179,11 @@ export default function HotelBookings() {
     }
   };
 
-  const fetchHotelOffers = async (hotelIds: string[]) => {
-    if ((!cityCode && hotelIds.length === 0) || !checkInDate) {
+  const fetchHotelOffers = async (
+    hotelIds: string[],
+    extraParams: Record<string, string>
+  ) => {
+    if ((!cityCode && hotelIds?.length === 0) || !checkInDate) {
       setError("Missing city code, dates, or hotel IDs.");
       return;
     }
@@ -99,7 +191,7 @@ export default function HotelBookings() {
     setLoading(true);
     setError(null);
 
-    const hotelIdsParam = hotelIds.join(",");
+    const hotelIdsParam = hotelIds?.join(",");
 
     let queryString = `hotelIds=${hotelIdsParam}&checkInDate=${checkInDate}&adults=${adults}`;
 
@@ -118,7 +210,12 @@ export default function HotelBookings() {
           (offer: HotelOffer) => offer.available
         );
 
-        setHotelOffers((prevOffers) => [...prevOffers, ...availableOffers]);
+        setHotelOffers((prevOffers) => {
+          const newOffers = [...prevOffers, ...availableOffers];
+          hotelOffersRef.current = newOffers;
+          return newOffers;
+        });
+
         setError(null);
 
         await fetchHotelDataForHotels(availableOffers);
@@ -138,10 +235,49 @@ export default function HotelBookings() {
     const endIndex = startIndex + BATCH_SIZE;
     const batch = allHotelIds?.slice(startIndex, endIndex);
     if (batch?.length > 0) {
-      await fetchHotelOffers(batch);
+      await fetchHotelOffers(batch, additionalQueryParams);
       setCurrentBatch(currentBatch + 1);
     }
   };
+
+  const sortedNonFeaturedOffers = useMemo(() => {
+    const offers = [...nonFeaturedOffers];
+
+    offers.sort((a, b) => {
+      const hotelDataA = hotelData[a.hotel.hotelId] || {};
+      const hotelDataB = hotelData[b.hotel.hotelId] || {};
+
+      const ratingA = hotelDataA.rating || 0;
+      const ratingB = hotelDataB.rating || 0;
+
+      const nameA = a.hotel.name.toLowerCase();
+      const nameB = b.hotel.name.toLowerCase();
+
+      const priceA =
+        a.offers && a.offers[0]?.price?.total
+          ? parseFloat(a.offers[0].price.total)
+          : Infinity;
+      const priceB =
+        b.offers && b.offers[0]?.price?.total
+          ? parseFloat(b.offers[0].price.total)
+          : Infinity;
+
+      switch (sortBy) {
+        case "price":
+          return priceA - priceB;
+        case "rating":
+          return ratingB - ratingA;
+        case "name":
+          return nameA.localeCompare(nameB);
+        case "name_desc":
+          return nameB.localeCompare(nameA);
+        default:
+          return 0;
+      }
+    });
+
+    return offers;
+  }, [nonFeaturedOffers, hotelData, sortBy]);
 
   const fetchHotelDataForHotels = async (hotelOffers: HotelOffer[]) => {
     try {
@@ -157,14 +293,18 @@ export default function HotelBookings() {
         const data = await response.json();
         const { photoUrl, rating, streetAddress } = data;
 
-        setHotelData((prevData) => ({
-          ...prevData,
-          [hotelId]: {
-            image: photoUrl,
-            rating: rating,
-            streetAddress: streetAddress,
-          },
-        }));
+        setHotelData((prevData) => {
+          const newData = {
+            ...prevData,
+            [hotelId]: {
+              image: photoUrl,
+              rating: rating,
+              streetAddress: streetAddress,
+            },
+          };
+          hotelDataRef.current = newData;
+          return newData;
+        });
       }
     } catch (error) {
       console.error("Error fetching hotel data:", error);
@@ -172,8 +312,20 @@ export default function HotelBookings() {
   };
 
   const handleHotelSelect = async (hotelIds: string[]) => {
-    setHotelOffers([]);
-    await fetchHotelOffers(hotelIds);
+    await fetchHotelOffers(hotelIds, additionalQueryParams);
+  };
+  const hasEnoughFeatured = () => {
+    const availableOffers = hotelOffersRef.current.filter(
+      (offer) => offer.available
+    );
+    return availableOffers.slice(0, numFeatured).length >= numFeatured;
+  };
+
+  const hasEnoughNonFeatured = () => {
+    const availableOffers = hotelOffersRef.current.filter(
+      (offer) => offer.available
+    );
+    return availableOffers.slice(numFeatured).length >= 4;
   };
 
   useEffect(() => {
@@ -181,15 +333,46 @@ export default function HotelBookings() {
       const hotelIds = await fetchHotelsByCity();
       setAllHotelIds(hotelIds);
       setCurrentBatch(0);
-      if (hotelIds?.length > 0) {
-        await fetchNextBatch();
+
+      let batchNumber = 0;
+      const totalBatches = Math.ceil(hotelIds?.length / BATCH_SIZE);
+
+      while (
+        batchNumber < totalBatches &&
+        (!hasEnoughFeatured() || !hasEnoughNonFeatured())
+      ) {
+        const startIndex = batchNumber * BATCH_SIZE;
+        const endIndex = startIndex + BATCH_SIZE;
+        const batchHotelIds = hotelIds?.slice(startIndex, endIndex);
+
+        await fetchHotelOffers(batchHotelIds, additionalQueryParams);
+        setCurrentBatch((prevBatch) => prevBatch + 1);
+
+        batchNumber++;
       }
     };
 
     fetchOffersInBatches();
   }, [cityCode, checkInDate, checkOutDate]);
 
-  const numFeatured = 3;
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const dropdownElement = document.getElementById("filter-dropdown");
+      if (dropdownElement && !dropdownElement.contains(event.target as Node)) {
+        setIsFilterDropdownOpen(false);
+      }
+    };
+
+    if (isFilterDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isFilterDropdownOpen]);
 
   return (
     <div
@@ -236,11 +419,14 @@ export default function HotelBookings() {
 
       <div className="flex justify-between items-center w-full gap-[15px] text-xs md:text-lg md:mt-12 overflow-x-scroll md:overflow-hidden scrollbar mt-4">
         <div className="flex w-max md:w-full h-full">
-          <HotelButton label="Hotel" isActive />
-          <HotelButton label="Apartments" isActive={false} />
-          <HotelButton label="Condo" isActive={false} />
-          <HotelButton label="Mansion" isActive={false} />
-          <HotelButton label="Homeless" isActive={false} />
+          {["Hotel", "Apartments", "Condo", "Mansion"].map((label) => (
+            <HotelButton
+              key={label}
+              label={label}
+              isActive={selectedFilter === label}
+              onClick={() => handleFilterClick(label)}
+            />
+          ))}
         </div>
       </div>
 
@@ -278,41 +464,98 @@ export default function HotelBookings() {
 
       <div className="flex w-full justify-between items-center font-Urbanist">
         <p className="font-bold text-2xl">Hotels Nearby</p>
-        <button className="flex justify-center items-center bg-[#ECECEC] opacity-50 rounded-[50px] p-2 md:p-3 px-2 md:px-8">
-          <p className="sm:pr-1">Filter</p>
-          <VscSettings className="rotate-[90deg] h-6 w-6" />
-        </button>
-      </div>
+        <div className="relative inline-block text-left">
+          <button
+            className="relative flex justify-center items-center bg-[#ebebeb]  hover:bg-[#DADADA] active:bg-[#BBB] opacity-50 rounded-[50px] p-3 px-8 transition-all duration-600 ease-in-out"
+            onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
+          >
+            <p>Filter: {sortByDisplayName(sortBy)}</p>
+            <VscSettings className="rotate-[90deg] h-6 w-6" />
+          </button>
 
-      <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-        {hotelOffers.length > numFeatured &&
-          hotelOffers
-            .filter((offer) => offer.available)
-            .slice(numFeatured)
-            .map((offer) => {
-              const hotelId = offer.hotel.hotelId;
-              const data = hotelData[hotelId] || {};
-              const image = data.image || "";
-              const rating = data.rating || null;
-              const streetAddress = data.streetAddress || "";
-
-              return (
-                <HotelCard
-                  key={hotelId}
-                  streetAddress={streetAddress}
-                  offer={offer}
-                  image={image}
-                  rating={rating || 0}
-                  featured={false}
-                />
-              );
-            })}
+          {isFilterDropdownOpen && (
+            <div
+              id="filter-dropdown"
+              className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+            >
+              <div
+                className="py-1"
+                role="menu"
+                aria-orientation="vertical"
+                aria-labelledby="options-menu"
+              >
+                <button
+                  className={`w-full text-left px-4 py-2 text-sm ${
+                    sortBy === "price"
+                      ? "bg-gray-200 text-gray-900"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                  onClick={() => handleSortChange("price")}
+                >
+                  Price
+                </button>
+                <button
+                  className={`w-full text-left px-4 py-2 text-sm ${
+                    sortBy === "rating"
+                      ? "bg-gray-200 text-gray-900"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                  onClick={() => handleSortChange("rating")}
+                >
+                  Rating
+                </button>
+                <button
+                  className={`w-full text-left px-4 py-2 text-sm ${
+                    sortBy === "name"
+                      ? "bg-gray-200 text-gray-900"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                  onClick={() => handleSortChange("name")}
+                >
+                  Name (A-Z)
+                </button>
+                <button
+                  className={`w-full text-left px-4 py-2 text-sm ${
+                    sortBy === "name_desc"
+                      ? "bg-gray-200 text-gray-900"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                  onClick={() => handleSortChange("name_desc")}
+                >
+                  Name (Z-A)
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+      {sortedNonFeaturedOffers.length > 0 && (
+        <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+          {sortedNonFeaturedOffers.map((offer) => {
+            const hotelId = offer.hotel.hotelId;
+            const data = hotelData[hotelId] || {};
+            const image = data.image || "";
+            const rating = data.rating || null;
+            const streetAddress = data.streetAddress || "";
+
+            return (
+              <HotelCard
+                key={hotelId}
+                streetAddress={streetAddress}
+                offer={offer}
+                image={image}
+                rating={rating || 0}
+                featured={false}
+              />
+            );
+          })}
+        </div>
+      )}
 
       {currentBatch * BATCH_SIZE < allHotelIds?.length && (
         <button
           onClick={fetchNextBatch}
-          className="bg-[#71D1FC] hover:bg-[#5BBEEB] active:bg-[#5AAEEA] transition-all duration-600 ease-in-out text-white rounded-lg p-2 mt-4"
+          className="bg-[#71D1FC] hover:bg-[#5BBEEB] active:bg-[#5AAEEA] transition-all duration-600 ease-in-out text-white rounded-lg p-2 mb-10"
         >
           Load More Hotels
         </button>
