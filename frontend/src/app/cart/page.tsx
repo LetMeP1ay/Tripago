@@ -12,6 +12,7 @@ export default function ShoppingCart() {
   const { cartItems, removeFromCart } = useContext(CartContext);
   const [timeLeft, setTimeLeft] = useState(600);
   const router = useRouter();
+  const [displayStripe, setDisplayStripe] = useState<boolean>(false);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -163,7 +164,7 @@ export default function ShoppingCart() {
                 ${totalPrice}{" "}
                 <p className="text-[#8C8D89] font-light">Total Price</p>
               </p>
-              <button className="bg-[#1C6AE4] hover:bg-[#0B54FF] active:bg-[#0A32FF] p-4 text-white rounded-sm font-medium transition-all duration-600 ease-in-out">
+              <button onClick={() => router.push("/checkout")} className="bg-[#1C6AE4] hover:bg-[#0B54FF] active:bg-[#0A32FF] p-4 text-white rounded-sm font-medium transition-all duration-600 ease-in-out">
                 Proceed to Payment
               </button>
             </div>

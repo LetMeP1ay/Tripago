@@ -62,7 +62,7 @@ export interface HotelOffer {
     longitude: number;
   };
   available: boolean;
-  offers?: Array<{
+  offers: Array<{
     id: string;
     checkInDate: string;
     checkOutDate?: string;
