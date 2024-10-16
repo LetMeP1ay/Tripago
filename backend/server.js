@@ -92,11 +92,24 @@ app.get("/api/food-info", async (req, res) => {
   try {
     const foodInfo = await getFoodInArea(lat, lng);
 
+    const photoReferences = foodInfo.map((placeInfo) => placeInfo.photos.map((photo) => photo.photo_reference))
+    const photoWidths = foodInfo.map((placeInfo) => placeInfo.photos.map((photo) => photo.width))
+
+    console.log(photoReferences);
+    console.log(photoWidths);
+
+    const photoUrls = [];
+    for(i in photoReferences) {
+      photoUrls.push(getPhotoUrl(photoReferences[i], photoWidths[i]));
+    }
+    // add to array
+    console.log(photoUrls);
+
+
     if (foodInfo.length === 0) {
       return res.status(404).json({ message: "No Info for this place" });
     }
-
-    res.json( foodInfo );
+    res.json( {foodInfo, photoUrls} );
   } catch (error) {
     console.error("Error fetching Food Details:", error.message);
     res.status(500).json({ error: "Failed to fetch food." });
@@ -105,7 +118,7 @@ app.get("/api/food-info", async (req, res) => {
 
 app.get("/api/food-info-test", async (req, res) => {
   const data = req.query;
-  res.json( data );
+  res.json(data);
 });
 
 const amadeusAuth = axios.create({
@@ -198,6 +211,24 @@ app.get("/api/flights", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch flight offers" });
   }
 });
+
+app.get("/api/hotel-data", async (req, res) => {
+  const { hotelName, lat, lng } = req.query;
+
+  try {
+    const { placeId, rating, photoReference, photoWidth, streetAddress } =
+      await getPlaceData(hotelName, lat, lng);
+
+    const photoUrl = getPhotoUrl(photoReference, photoWidth);
+
+    res.json({ placeId, photoUrl, rating, streetAddress });
+  } catch (error) {
+    console.error("Error fetching hotel images:", error.message);
+    res.status(500).json({ error: "Failed to fetch hotel data." });
+  }
+});
+
+
 
 app.get("/api/hotels", async (req, res) => {
   try {
