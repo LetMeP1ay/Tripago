@@ -7,6 +7,7 @@ import {
   useMemo,
   useRef,
   useState,
+  Suspense,
 } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
@@ -251,7 +252,11 @@ export default function HotelBookings() {
 
       if (data.data && Array.isArray(data.data)) {
         const availableOffers = data.data.filter(
-          (offer: HotelOffer) => offer.available
+          (offer: HotelOffer) =>
+            offer.available &&
+            !hotelOffersRef.current.some(
+              (o) => o.hotel.hotelId === offer.hotel.hotelId
+            )
         );
 
         setHotelOffers((prevOffers) => {
@@ -398,7 +403,7 @@ export default function HotelBookings() {
       setCurrentBatch(0);
 
       let batchNumber = 0;
-      const totalBatches = Math.ceil(hotelIds?.length / BATCH_SIZE);
+      const totalBatches = Math.ceil(hotelIds.length / BATCH_SIZE);
 
       while (
         batchNumber < totalBatches &&
@@ -406,7 +411,7 @@ export default function HotelBookings() {
       ) {
         const startIndex = batchNumber * BATCH_SIZE;
         const endIndex = startIndex + BATCH_SIZE;
-        const batchHotelIds = hotelIds?.slice(startIndex, endIndex);
+        const batchHotelIds = hotelIds.slice(startIndex, endIndex);
 
         await fetchHotelOffers(batchHotelIds, additionalQueryParams);
         setCurrentBatch((prevBatch) => prevBatch + 1);
@@ -416,7 +421,7 @@ export default function HotelBookings() {
     };
 
     fetchOffersInBatches();
-  }, [cityCode, checkInDate, checkOutDate]);
+  }, [cityCode, checkInDate, checkOutDate, additionalQueryParams]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -438,223 +443,238 @@ export default function HotelBookings() {
   }, [isFilterDropdownOpen]);
 
   return (
-    <div
-      className={`flex-col justify-start items-center gap-[15px] inline-flex w-full p-6 ${
-        hotelOffers.length > 0 ? "h-auto" : "h-full"
-      } bg-white text-black`}
-    >
-      <div className="flex justify-between items-center w-full md:text-xl">
-        <div>
-          <p className="opacity-50">Discover your</p>
-          <p className="font-bold">perfect place to stay</p>
-        </div>
-
-        <div className="px-[15px] py-2.5 bg-white rounded-[50px] border-2 border-black/10 flex items-center w-1/2">
-          <input
-            className="text-black/50 text-xs md:text-xl font-bold w-full outline-none"
-            placeholder="Search by address"
-            value={addressInput}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setAddressInput(e.target.value)
-            }
-          />
-          <Image
-            alt="icon"
-            src="/Arrow.svg"
-            height={20}
-            width={20}
-            className="h-3 w-3 md:h-5 md:w-5 rotate-90"
-          />
-        </div>
-      </div>
-      <div className="flex w-full gap-[15px] mt-4">
-        <div className="w-1/2 h-10 bg-[#ebebeb] rounded-[50px] flex items-center gap-2.5 p-2.5">
-          <HotelSearchBar
-            countryCode={countryCode}
-            onHotelSelect={handleHotelSelect}
-          />
-        </div>
-
-        <button
-          className="transition-all duration-600 ease-in-out w-1/2 h-10 bg-[#ebebeb] hover:bg-[#DADADA] active:bg-[#CCCCCC] rounded-[50px] flex justify-center items-center gap-2.5"
-          onClick={() => router.push("/")}
-        >
-          <p className="w-full text-center opacity-50">Open Map</p>
-        </button>
-      </div>
-      <div className="flex justify-between items-center w-full gap-[15px] text-xs md:text-lg md:mt-12 overflow-x-scroll md:overflow-hidden scrollbar mt-4">
-        <div className="flex w-max md:w-full h-full">
-          {["Hotel", "Apartments", "Condo", "Mansion"].map((label) => (
-            <HotelButton
-              key={label}
-              label={label}
-              isActive={selectedFilter === label}
-              onClick={() => handleFilterClick(label)}
-            />
-          ))}
-        </div>
-      </div>
-      {loading && <p>Loading...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-      {hotelOffers.length > 0 && (
-        <div className="flex w-full overflow-x-scroll md:overflow-hidden scrollbar md:justify-center">
-          <div className="flex gap-4">
-            {hotelOffers
-              .filter((offer) => offer.available)
-              .slice(0, numFeatured)
-              .map((offer) => {
-                const hotelId = offer.hotel.hotelId;
-                const data = hotelData[hotelId] || {};
-                const image = data.image || "";
-                const rating = data.rating || null;
-                const streetAddress = data.streetAddress || "";
-
-                return (
-                  <div
-                    key={hotelId}
-                    className="flex-shrink-0 cursor-pointer"
-                    onClick={() =>
-                      handleAddToCart(
-                        offer,
-                        image,
-                        streetAddress,
-                        false,
-                        rating || 0
-                      )
-                    }
-                  >
-                    <HotelCard
-                      offer={offer}
-                      streetAddress={streetAddress}
-                      image={image}
-                      rating={rating || 0}
-                      featured={true}
-                    />
-                  </div>
-                );
-              })}
+    <Suspense
+      fallback={
+        <div className="flex h-screen w-screen items-center justify-center">
+          <div
+            className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-black"
+            role="status"
+          >
+            <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+              Loading...
+            </span>
           </div>
         </div>
-      )}
-      <div className="flex w-full justify-between items-center font-Urbanist">
-        <p className="font-bold text-2xl">Hotels Nearby</p>
-        <div className="relative inline-block text-left">
-          <button
-            className="relative flex justify-center items-center bg-[#ebebeb]  hover:bg-[#DADADA] active:bg-[#BBB] opacity-50 rounded-[50px] p-3 px-8 transition-all duration-600 ease-in-out"
-            onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
-          >
-            <p>Filter: {sortByDisplayName(sortBy)}</p>
-            <VscSettings className="rotate-[90deg] h-6 w-6" />
-          </button>
+      }
+    >
+      <div
+        className={`flex-col justify-start items-center gap-[15px] inline-flex w-full p-6 ${
+          hotelOffers.length > 0 ? "h-auto" : "h-full"
+        } bg-white text-black`}
+      >
+        <div className="flex justify-between items-center w-full md:text-xl">
+          <div>
+            <p className="opacity-50">Discover your</p>
+            <p className="font-bold">perfect place to stay</p>
+          </div>
 
-          {isFilterDropdownOpen && (
-            <div
-              id="filter-dropdown"
-              className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
-            >
-              <div
-                className="py-1"
-                role="menu"
-                aria-orientation="vertical"
-                aria-labelledby="options-menu"
-              >
-                <button
-                  className={`w-full text-left px-4 py-2 text-sm ${
-                    sortBy === "price"
-                      ? "bg-gray-200 text-gray-900"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                  onClick={() => handleSortChange("price")}
-                >
-                  Price
-                </button>
-                <button
-                  className={`w-full text-left px-4 py-2 text-sm ${
-                    sortBy === "rating"
-                      ? "bg-gray-200 text-gray-900"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                  onClick={() => handleSortChange("rating")}
-                >
-                  Rating
-                </button>
-                <button
-                  className={`w-full text-left px-4 py-2 text-sm ${
-                    sortBy === "name"
-                      ? "bg-gray-200 text-gray-900"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                  onClick={() => handleSortChange("name")}
-                >
-                  Name (A-Z)
-                </button>
-                <button
-                  className={`w-full text-left px-4 py-2 text-sm ${
-                    sortBy === "name_desc"
-                      ? "bg-gray-200 text-gray-900"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                  onClick={() => handleSortChange("name_desc")}
-                >
-                  Name (Z-A)
-                </button>
-              </div>
-            </div>
-          )}
+          <div className="px-[15px] py-2.5 bg-white rounded-[50px] border-2 border-black/10 flex items-center w-1/2">
+            <input
+              className="text-black/50 text-xs md:text-xl font-bold w-full outline-none"
+              placeholder="Search by address"
+              value={addressInput}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setAddressInput(e.target.value)
+              }
+            />
+            <Image
+              alt="icon"
+              src="/Arrow.svg"
+              height={20}
+              width={20}
+              className="h-3 w-3 md:h-5 md:w-5 rotate-90"
+            />
+          </div>
         </div>
-      </div>
-      {filteredNonFeaturedOffers.length > 0 && (
-        <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-          {filteredNonFeaturedOffers.map((offer) => {
-            const hotelId = offer.hotel.hotelId;
-            const data = hotelData[hotelId] || {};
-            const image = data.image || "";
-            const rating = Number(data.rating) || 0;
-            const streetAddress = data.streetAddress || "";
+        <div className="flex w-full gap-[15px] mt-4">
+          <div className="w-1/2 h-10 bg-[#ebebeb] rounded-[50px] flex items-center gap-2.5 p-2.5">
+            <HotelSearchBar
+              countryCode={countryCode}
+              onHotelSelect={handleHotelSelect}
+            />
+          </div>
 
-            return (
-              <div key={hotelId}>
-                <HotelCard
-                  streetAddress={streetAddress}
-                  offer={offer}
-                  image={image}
-                  rating={rating || 0}
-                  featured={false}
-                />
-                <div className="w-full flex justify-end items-center">
+          <button
+            className="transition-all duration-600 ease-in-out w-1/2 h-10 bg-[#ebebeb] hover:bg-[#DADADA] active:bg-[#CCCCCC] rounded-[50px] flex justify-center items-center gap-2.5"
+            onClick={() => router.push("/")}
+          >
+            <p className="w-full text-center opacity-50">Open Map</p>
+          </button>
+        </div>
+        <div className="flex justify-between items-center w-full gap-[15px] text-xs md:text-lg md:mt-12 overflow-x-scroll md:overflow-hidden scrollbar mt-4">
+          <div className="flex w-max md:w-full h-full">
+            {["Hotel", "Apartments", "Condo", "Mansion"].map((label) => (
+              <HotelButton
+                key={label}
+                label={label}
+                isActive={selectedFilter === label}
+                onClick={() => handleFilterClick(label)}
+              />
+            ))}
+          </div>
+        </div>
+        {loading && <p>Loading...</p>}
+        {error && <p className="text-red-500">{error}</p>}
+        {hotelOffers.length > 0 && (
+          <div className="flex w-full overflow-x-scroll md:overflow-hidden scrollbar md:justify-center">
+            <div className="flex gap-4">
+              {hotelOffers
+                .filter((offer) => offer.available)
+                .slice(0, numFeatured)
+                .map((offer) => {
+                  const hotelId = offer.hotel.hotelId;
+                  const data = hotelData[hotelId] || {};
+                  const image = data.image || "";
+                  const rating = data.rating || null;
+                  const streetAddress = data.streetAddress || "";
+
+                  return (
+                    <div
+                      key={hotelId}
+                      className="flex-shrink-0 cursor-pointer"
+                      onClick={() =>
+                        handleAddToCart(
+                          offer,
+                          image,
+                          streetAddress,
+                          false,
+                          rating || 0
+                        )
+                      }
+                    >
+                      <HotelCard
+                        offer={offer}
+                        streetAddress={streetAddress}
+                        image={image}
+                        rating={rating || 0}
+                        featured={true}
+                      />
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        )}
+        <div className="flex w-full justify-between items-center font-Urbanist">
+          <p className="font-bold text-2xl">Hotels Nearby</p>
+          <div className="relative inline-block text-left">
+            <button
+              className="relative flex justify-center items-center bg-[#ebebeb]  hover:bg-[#DADADA] active:bg-[#BBB] opacity-50 rounded-[50px] p-3 px-8 transition-all duration-600 ease-in-out"
+              onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
+            >
+              <p>Filter: {sortByDisplayName(sortBy)}</p>
+              <VscSettings className="rotate-[90deg] h-6 w-6" />
+            </button>
+
+            {isFilterDropdownOpen && (
+              <div
+                id="filter-dropdown"
+                className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+              >
+                <div
+                  className="py-1"
+                  role="menu"
+                  aria-orientation="vertical"
+                  aria-labelledby="options-menu"
+                >
                   <button
-                    className="w-1/4 rounded-lg bg-[#71D1FC] mb-8 p-3 text-sm font-medium text-white transition-all duration-600 ease-in-out hover:bg-[#5BBEEB] active:bg-[#4DAED3] ml-auto"
-                    onClick={() =>
-                      handleAddToCart(
-                        offer,
-                        image,
-                        streetAddress,
-                        false,
-                        rating || 0
-                      )
-                    }
+                    className={`w-full text-left px-4 py-2 text-sm ${
+                      sortBy === "price"
+                        ? "bg-gray-200 text-gray-900"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                    onClick={() => handleSortChange("price")}
                   >
-                    Add to Cart
+                    Price
+                  </button>
+                  <button
+                    className={`w-full text-left px-4 py-2 text-sm ${
+                      sortBy === "rating"
+                        ? "bg-gray-200 text-gray-900"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                    onClick={() => handleSortChange("rating")}
+                  >
+                    Rating
+                  </button>
+                  <button
+                    className={`w-full text-left px-4 py-2 text-sm ${
+                      sortBy === "name"
+                        ? "bg-gray-200 text-gray-900"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                    onClick={() => handleSortChange("name")}
+                  >
+                    Name (A-Z)
+                  </button>
+                  <button
+                    className={`w-full text-left px-4 py-2 text-sm ${
+                      sortBy === "name_desc"
+                        ? "bg-gray-200 text-gray-900"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                    onClick={() => handleSortChange("name_desc")}
+                  >
+                    Name (Z-A)
                   </button>
                 </div>
               </div>
-            );
-          })}
+            )}
+          </div>
         </div>
-      )}
-      {currentBatch * BATCH_SIZE < allHotelIds?.length && (
-        <button
-          onClick={fetchNextBatch}
-          className="bg-[#71D1FC] hover:bg-[#5BBEEB] active:bg-[#5AAEEA] transition-all duration-600 ease-in-out text-white rounded-lg p-2 mb-10"
-        >
-          Load More Hotels
-        </button>
-      )}{" "}
-      <NotificationPopup
-        message="Hotel added to cart successfully!"
-        onClose={() => setShowNotification(false)}
-        show={showNotification}
-      />
-    </div>
+        {filteredNonFeaturedOffers.length > 0 && (
+          <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+            {filteredNonFeaturedOffers.map((offer) => {
+              const hotelId = offer.hotel.hotelId;
+              const data = hotelData[hotelId] || {};
+              const image = data.image || "";
+              const rating = Number(data.rating) || 0;
+              const streetAddress = data.streetAddress || "";
+
+              return (
+                <div key={hotelId}>
+                  <HotelCard
+                    streetAddress={streetAddress}
+                    offer={offer}
+                    image={image}
+                    rating={rating || 0}
+                    featured={false}
+                  />
+                  <div className="w-full flex justify-end items-center">
+                    <button
+                      className="w-1/4 rounded-lg bg-[#71D1FC] mb-8 p-3 text-sm font-medium text-white transition-all duration-600 ease-in-out hover:bg-[#5BBEEB] active:bg-[#4DAED3] ml-auto"
+                      onClick={() =>
+                        handleAddToCart(
+                          offer,
+                          image,
+                          streetAddress,
+                          false,
+                          rating || 0
+                        )
+                      }
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {currentBatch * BATCH_SIZE < allHotelIds?.length && (
+          <button
+            onClick={fetchNextBatch}
+            className="bg-[#71D1FC] hover:bg-[#5BBEEB] active:bg-[#5AAEEA] transition-all duration-600 ease-in-out text-white rounded-lg p-2 mb-10"
+          >
+            Load More Hotels
+          </button>
+        )}{" "}
+        <NotificationPopup
+          message="Hotel added to cart successfully!"
+          onClose={() => setShowNotification(false)}
+          show={showNotification}
+        />
+      </div>
+    </Suspense>
   );
 }
