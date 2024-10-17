@@ -1,9 +1,11 @@
 {
   "name": "backend",
-  "version": "1.0.0",
-  "main": "index.ts",
+  "version": "2.0.0",
+  "main": "server.js",
   "scripts": {
-    "backend": "nodemon server.js"
+    "backend": "nodemon server.js",
+    "build": "echo 'We are working on creating a stable build...'",
+    "test": "echo 'We are working on creating unit tests...'"
   },
   "author": "",
   "license": "ISC",

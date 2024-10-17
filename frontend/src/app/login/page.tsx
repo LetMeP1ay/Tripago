@@ -111,7 +111,7 @@ const Login: React.FC = () => {
       )}
 
       <p className="pt-2">
-        Don't have an account?
+        Don&apos;t have an account?
         <a
           className="cursor-pointer pl-2 text-[#71D1FC] hover:text-[#5BBEEB] active:text-[#5AAEEA] transition-all duration-600 ease-in-out"
           onClick={() => router.push("/signup")}
