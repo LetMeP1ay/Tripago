@@ -126,7 +126,6 @@ export default function FindFood() {
       .join(" ");
   }
 
-  const gap = "15px";
   const desktopImgSize = "w-[300px] h-[220px]";
 
   return (
