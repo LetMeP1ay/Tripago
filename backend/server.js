@@ -204,7 +204,7 @@ app.get("/api/flights", async (req, res) => {
       returnDate,
       adults,
       travelClass,
-      currencyCode = "USD",
+      currencyCode,
     } = req.query;
 
     const params = {

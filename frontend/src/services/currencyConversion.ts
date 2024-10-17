@@ -31,3 +31,18 @@ export async function getUserCurrencyConversion(
     throw error;
   }
 }
+
+export async function getUserHomeCurrency(): Promise<string> {
+  try {
+    const position = await getUserLocation();
+    const country = await getCountryFromCoordinates(
+      position.coords.latitude,
+      position.coords.longitude
+    );
+    console.log(country);
+    const userCurrency = await getCurrencyFromCountry(country);
+    return userCurrency;
+  } catch (error) {
+    throw error;
+  }
+}
