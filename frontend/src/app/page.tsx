@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
 import { Rating } from "@mui/material";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 export default function Map() {
   const mapRef = React.useRef<HTMLDivElement>(null);
@@ -16,6 +16,11 @@ export default function Map() {
   const [radius, setRadius] = useState<number>(5000);
   const [latitude, setLatitude] = useState<number>();
   const [longitude, setLongitude] = useState<number>();
+
+  const renderRating = (container: HTMLElement, value: number) => {
+    const root = createRoot(container);
+    root.render(<Rating value={value} precision={0.1} readOnly />);
+  };
 
   useEffect(() => {
     const getLocation = async () => {
@@ -185,10 +190,7 @@ export default function Map() {
           headerDiv.appendChild(ratingContainer);
           headerDiv.appendChild(contentDiv);
 
-          ReactDOM.render(
-            <Rating value={place.rating || 0} precision={0.1} readOnly />,
-            ratingDiv
-          );
+          renderRating(ratingDiv, place.rating || 0);
 
           contentDiv.innerHTML = `
             ${
@@ -214,6 +216,7 @@ export default function Map() {
         }
       });
     };
+
     getLocation();
     if (latitude && longitude) {
       initMap(latitude, longitude);
@@ -222,14 +225,12 @@ export default function Map() {
 
   return (
     <div className="flex flex-col h-screen relative">
-      {/* Map Container */}
       <div
         className="flex-grow h-full"
         ref={mapRef}
         style={{ minHeight: "500px" }}
       />
       <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-10 w-3/4 sm:w-1/2 lg:w-1/3">
-        {/* Search Bar */}
         <input
           ref={inputRef}
           type="text"
@@ -237,7 +238,6 @@ export default function Map() {
           className="w-full p-3 rounded-lg shadow-md border border-gray-300 focus:outline-none text-black"
         />
       </div>
-      {/* Filter Buttons */}
       <div className="absolute top-32 left-1/2 transform -translate-x-1/2 z-10 w-3/4 sm:w-1/2 lg:w-1/3 flex justify-center mt-4">
         <button
           onClick={() => setSelectedFilter("default")}
