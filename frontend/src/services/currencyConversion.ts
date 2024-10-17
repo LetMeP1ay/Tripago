@@ -19,7 +19,6 @@ export async function getUserCurrencyConversion(
       position.coords.latitude,
       position.coords.longitude
     );
-    console.log(country);
     const userCurrency = await getCurrencyFromCountry(country);
     const convertedAmount = await convertCurrency(
       amount,

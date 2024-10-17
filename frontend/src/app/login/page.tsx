@@ -9,11 +9,13 @@ import {
   OAuthProvider,
 } from "firebase/auth";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const googleProvider = new GoogleAuthProvider();
   const facebookProvider = new FacebookAuthProvider();
@@ -23,7 +25,7 @@ const Login: React.FC = () => {
     event.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      alert("Login successful!");
+      router.push("/flights");
     } catch (error: any) {
       setError(error.message);
     }
@@ -32,7 +34,7 @@ const Login: React.FC = () => {
   const handleGoogle = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      alert("Sign in successful!");
+      router.push("/flights");
     } catch (e: any) {
       setError(e.message);
     }
@@ -41,7 +43,7 @@ const Login: React.FC = () => {
   const handleFacebook = async () => {
     try {
       await signInWithPopup(auth, facebookProvider);
-      alert("Sign in successful!");
+      router.push("/flights");
     } catch (e: any) {
       setError(e.message);
     }
@@ -50,7 +52,7 @@ const Login: React.FC = () => {
   const handleApple = async () => {
     try {
       await signInWithPopup(auth, appleProvider);
-      alert("Sign in successful!");
+      router.push("/flights");
     } catch (e: any) {
       setError(e.message);
     }
@@ -95,11 +97,28 @@ const Login: React.FC = () => {
         />
         <button
           type="submit"
-          className="border border-gray-300 bg-[#5CBCF1D6] text-white rounded-lg w-full shadow-sm font-semibold py-2.5"
+          className="border border-gray-300 bg-[#71D1FC] hover:bg-[#5BBEEB] active:bg-[#5AAEEA] transition-all duration-600 ease-in-out text-white rounded-lg w-full shadow-sm font-semibold py-2.5"
         >
           Sign In
         </button>
       </form>
+      {error && (
+        <p className="pt-4 text-red-500">
+          {error.match(/\(auth\/invalid-credential\)/)
+            ? "Invalid credentials provided. Please try again."
+            : "An unknown error occurred. Please try again."}
+        </p>
+      )}
+
+      <p className="pt-2">
+        Don't have an account?
+        <a
+          className="cursor-pointer pl-2 text-[#71D1FC] hover:text-[#5BBEEB] active:text-[#5AAEEA] transition-all duration-600 ease-in-out"
+          onClick={() => router.push("/signup")}
+        >
+          Create one for free!
+        </a>
+      </p>
       <div className="relative flex py-5 items-center w-[366px]">
         <div className="flex-grow border-t border-gray-200"></div>
         <span className="flex-shrink mx-2 text-sm text-gray-600">OR</span>
