@@ -1,9 +1,12 @@
 {
   "name": "backend",
-  "version": "1.0.0",
-  "main": "index.ts",
+  "version": "2.0.0",
+  "main": "server.js",
   "scripts": {
-    "backend": "nodemon server.js"
+    "backend": "nodemon index.js",
+    "build": "npm run lint && npm run test",
+    "test": "jest",
+    "lint": "eslint ."
   },
   "author": "",
   "license": "ISC",
@@ -13,9 +16,9 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2"
   },
-  "keywords": [],
-  "description": "",
   "devDependencies": {
     "nodemon": "^3.1.4"
-  }
+  },
+  "keywords": [],
+  "description": ""
 }

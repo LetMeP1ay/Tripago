@@ -6,6 +6,7 @@ const cors = require("cors");
 dotenv.config();
 
 const app = express();
+module.exports = app;
 const port = process.env.PORT || 4000;
 
 app.use(
@@ -102,8 +103,13 @@ app.get("/api/hotel-data", async (req, res) => {
   const { hotelName, lat, lng } = req.query;
 
   try {
-    const { placeId, rating, photoReference, photoWidth, streetAddress } =
-      await getPlaceData(hotelName, lat, lng);
+    const {
+      placeId,
+      rating,
+      photoReference,
+      photoWidth,
+      streetAddress,
+    } = await getPlaceData(hotelName, lat, lng);
 
     const photoUrl = getPhotoUrl(photoReference, photoWidth);
 
@@ -457,6 +463,9 @@ app.get("/api/hotel-offers", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch hotel offers" });
   }
 });
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+
+if (process.env.NODE_ENV !== "test") {
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
+}
