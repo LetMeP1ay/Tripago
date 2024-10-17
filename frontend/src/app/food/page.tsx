@@ -126,17 +126,12 @@ export default function FindFood() {
       .join(" ");
   }
 
-  function isBooleanDefined(value?: boolean): boolean {
-    return value !== undefined;
-  }
-
   const gap = "15px";
   const desktopImgSize = "w-[300px] h-[220px]";
-  const mobileImgSize = "w-[250px] h-[110px]";
-  const numFeatured = 5;
+
   return (
     <div
-      className={`px-[${gap}] py-[${gap}] flex-col justify-start items-center gap-[${gap}] inline-flex w-full bg-white text-black md:overflow-x-hidden`}
+      className={`flex-col justify-start items-center inline-flex w-full bg-white text-black md:overflow-x-hidden`}
     >
       {finding && (
         <div className="text-center">
@@ -147,22 +142,21 @@ export default function FindFood() {
           </p>
         </div>
       )}
-      {loading && <p>Finding your next meal.</p>}
       <div>
         {foodOffers?.length > 0 && foodImages?.length ? (
-          <div>
+          <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4">
             {foodOffers.slice().map((offer, index) => (
-              <div key={offer.place_id} className="pt-[30px]">
+              <div key={offer.place_id} className="pb-20">
                 {" "}
                 {/*whole food card*/}
-                <div className={`relative flex py-[${gap}] items-center`}>
+                <div className={`relative flex items-center`}>
                   <div className="flex-grow border-t border-gray-400"></div>
                   <span className="flex-shrink mx-8 text-gray-600 text-xl font-medium">
                     <h1>{offer.name}</h1> {/*Name*/}
                   </span>
                   <div className="flex-grow border-t border-gray-400"></div>
                 </div>
-                <div className="flex justify-center items-center overflow-x-auto space-x-[15px] w-screen px-[15px]">
+                <div className="flex justify-center items-center overflow-x-auto w-full">
                   {" "}
                   {/*Images*/}
                   <div
@@ -181,7 +175,7 @@ export default function FindFood() {
                   {" "}
                   {/*Bio*/}
                   <div
-                    className={`justify-center items-end inline-flex flex-1 w-screen gap-[${gap}] px-[${gap}]`}
+                    className={`justify-center items-end inline-flex flex-1 w-full`}
                   >
                     {" "}
                     {/*Information*/}
@@ -204,7 +198,9 @@ export default function FindFood() {
                     <div>
                       {" "}
                       {/*Price*/}
-                      <p>{"$".repeat(offer.price_level) || "$"},</p>
+                      <p className="mx-2">
+                        {"$".repeat(offer.price_level) || "$"},
+                      </p>
                     </div>
                     <div>
                       {" "}
@@ -221,11 +217,11 @@ export default function FindFood() {
                   </div>{" "}
                   {/*Information end*/}
                   <div
-                    className={`justify-center items-between inline-flex flex-1 w-screen gap-[${gap}] px-[${gap}]`}
+                    className={`justify-center items-between inline-flex flex-1 w-full`}
                   >
                     {" "}
                     {/*Information cont*/}
-                    <div>
+                    <div className="pr-2">
                       <p>{toTitleCase(offer.types[0])},</p>
                     </div>
                     <div>
@@ -234,11 +230,11 @@ export default function FindFood() {
                   </div>{" "}
                   {/*Information cont end*/}
                   <div
-                    className={`justify-center items-between inline-flex flex-1 w-screen gap-[${gap}] px-[${gap}]`}
+                    className={`justify-center items-center text-center inline-flex flex-1 w-full`}
                   >
                     {" "}
                     {/*Opening info*/}
-                    <div>
+                    <div className="flex justify-center items-center text-center">
                       <p>
                         {offer.opening_hours?.open_now
                           ? "Currently Open"
@@ -270,6 +266,7 @@ export default function FindFood() {
           </div>
         </div>
       )}
+      {loading && <p>Finding your next meal.</p>}
     </div>
   );
 }
