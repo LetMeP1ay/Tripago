@@ -513,8 +513,7 @@ export default function HotelBookings() {
             ))}
           </div>
         </div>
-        {loading && <p>Loading...</p>}
-        {error && <p className="text-red-500">{error}</p>}
+        {loading && <p>Getting hotel data...</p>}
         {hotelOffers.length > 0 && (
           <div className="flex w-full overflow-x-scroll md:overflow-hidden scrollbar md:justify-center">
             <div className="flex gap-4">
