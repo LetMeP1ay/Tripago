@@ -1,15 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import {
-  getCountryFromCoordinates,
-  getUserCoords,
-  getUserLocation,
-} from "@/services/locationService";
-import testData from '../../../../backend/Temp.json';
 import { Rating } from "@mui/material";
-import Image from 'next/image';
 
 interface FoodOffer {
   types: string[];
@@ -41,19 +33,12 @@ interface FoodOffer {
 }
 
 export default function FindFood() {
-  const router = useRouter();
-
-  //const query = new URLSearchParams(window.location.search);
-  //const cityCode = query.get("cityCode") || "";
-
   const [foodOffers, setFoodOffers] = useState<FoodOffer[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [finding, setFinding] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [foodImages, setFoodImages] = useState<string[]>([]);
   const [latitude, setLatitude] = useState<number>();
   const [longitude, setLongitude] = useState<number>();
-  const [country, setCountry] = useState<string>();
 
   useEffect(() => {
     const getLocation = async () => {
@@ -80,7 +65,6 @@ export default function FindFood() {
 
   const fetchFoodByLocation = async () => {
     setLoading(true);
-    setError(null);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/food-info?lat=${latitude}&lng=${longitude}`
@@ -91,15 +75,21 @@ export default function FindFood() {
       setLoading(false);
     } catch (error) {
       console.error("Error fetching food by city:", error);
-      setError("Failed to fetch food.");
       return [];
     }
   };
 
-  function haversineDistance(lat1?: number, lon1?: number, lat2?: number, lon2?: number): string | null {
+  function haversineDistance(
+    lat1?: number,
+    lon1?: number,
+    lat2?: number,
+    lon2?: number
+  ): string | null {
     if (
-      lat1 === undefined || lon1 === undefined ||
-      lat2 === undefined || lon2 === undefined
+      lat1 === undefined ||
+      lon1 === undefined ||
+      lat2 === undefined ||
+      lon2 === undefined
     ) {
       console.error("All coordinates must be provided.");
       return null; // Return null to indicate that the function didn't run
@@ -112,8 +102,10 @@ export default function FindFood() {
 
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      Math.cos(toRadians(lat1)) *
+        Math.cos(toRadians(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
@@ -129,95 +121,164 @@ export default function FindFood() {
   function toTitleCase(str: string): string {
     return str
       .toLowerCase()
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
   }
 
-  function isBooleanDefined(value?: boolean): boolean {
-    return value !== undefined;
-  }
-
-  const gap = "15px";
   const desktopImgSize = "w-[300px] h-[220px]";
-  const mobileImgSize = "w-[250px] h-[110px]";
-  const numFeatured = 5;
+
   return (
     <div
-      className={`px-[${gap}] py-[${gap}] flex-col justify-start items-center gap-[${gap}] inline-flex w-screen bg-white text-black md:overflow-x-hidden`}
+      className={`flex-col justify-start items-center inline-flex w-full bg-white text-black md:overflow-x-hidden`}
     >
-      {finding && <div className="text-center"><p>Finding your location</p><p>if this is taking a while make sure you have location enabled on your device</p></div>}
-      {loading && <p>Finding your next meal.</p>}
+      {finding && (
+        <div className="text-center">
+          <p>Finding your location</p>
+          <p>
+            if this is taking a while make sure you have location enabled on
+            your device
+          </p>
+        </div>
+      )}
       <div>
         {foodOffers?.length > 0 && foodImages?.length ? (
-          <div>
+          <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4">
             {foodOffers.slice().map((offer, index) => (
-                <div key={offer.place_id} className="pt-[30px]"> {/*whole food card*/}
-                  <div className={`relative flex py-[${gap}] items-center`}>
-                    <div className="flex-grow border-t border-gray-400"></div>
-                    <span className="flex-shrink mx-8 text-gray-600 text-xl font-medium">
-                      <h1>{offer.name}</h1> {/*Name*/}
-                    </span>
-                    <div className="flex-grow border-t border-gray-400"></div>
-                  </div>
-                  <div className="flex justify-center items-center overflow-x-auto space-x-[15px] w-screen px-[15px]"> {/*Images*/}
-                    <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-hidden`}> {/*Image Div*/}
-                      <img className="flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-hidden" src={foodImages[index]} />
-                    </div>
-                  </div> {/*Images End*/}
-                  <div> {/*Bio*/}
-                    <div className={`justify-center items-end inline-flex flex-1 w-screen gap-[${gap}] px-[${gap}]`}> {/*Information*/}
-                      <div> {/*Rating*/}
-                        <p className="flex flex-row">
-                          {offer.rating}<Rating value={offer.rating || 0} precision={0.1} readOnly className="px-2" />{"("}{offer.user_ratings_total}{")"},
-                        </p>
-                      </div>
-                      <div> {/*Price*/}
-                        <p>{"$".repeat(offer.price_level) || "$"},</p>
-                      </div>
-                      <div> {/*Distance*/}
-                        <p>{haversineDistance(offer.geometry.location.lat, offer.geometry.location.lng, latitude, longitude)}</p>
-                      </div>
-                    </div> {/*Information end*/}
-                    <div className={`justify-center items-between inline-flex flex-1 w-screen gap-[${gap}] px-[${gap}]`}> {/*Information cont*/}
-                      <div>
-                        <p>{toTitleCase(offer.types[0])},</p>
-                      </div>
-                      <div>
-                        <p>{offer.vicinity}</p>
-                      </div>
-                    </div> {/*Information cont end*/}
-                    <div className={`justify-center items-between inline-flex flex-1 w-screen gap-[${gap}] px-[${gap}]`}> {/*Opening info*/}
-                      <div>
-                        <p>
-                          {(
-                            offer.opening_hours?.open_now ? (
-                              "Currently Open"
-                            ) : (
-                              "Closed Right Now"
-                            )
-                          )}
-                        </p>
-                      </div>
-                    </div>
-                  </div> {/*Opening info end*/}
+              <div key={offer.place_id} className="pb-20">
+                {" "}
+                {/*whole food card*/}
+                <div className={`relative flex items-center`}>
+                  <div className="flex-grow border-t border-gray-400"></div>
+                  <span className="flex-shrink mx-8 text-gray-600 text-xl font-medium">
+                    <h1>{offer.name}</h1> {/*Name*/}
+                  </span>
+                  <div className="flex-grow border-t border-gray-400"></div>
                 </div>
+                <div className="flex justify-center items-center overflow-x-auto w-full">
+                  {" "}
+                  {/*Images*/}
+                  <div
+                    className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-hidden`}
+                  >
+                    {" "}
+                    {/*Image Div*/}
+                    <img
+                      className="flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-hidden"
+                      src={foodImages[index]}
+                    />
+                  </div>
+                </div>{" "}
+                {/*Images End*/}
+                <div>
+                  {" "}
+                  {/*Bio*/}
+                  <div
+                    className={`justify-center items-end inline-flex flex-1 w-full`}
+                  >
+                    {" "}
+                    {/*Information*/}
+                    <div>
+                      {" "}
+                      {/*Rating*/}
+                      <p className="flex flex-row">
+                        {offer.rating}
+                        <Rating
+                          value={offer.rating || 0}
+                          precision={0.1}
+                          readOnly
+                          className="px-2"
+                        />
+                        {"("}
+                        {offer.user_ratings_total}
+                        {")"},
+                      </p>
+                    </div>
+                    <div>
+                      {" "}
+                      {/*Price*/}
+                      <p className="mx-2">
+                        {"$".repeat(offer.price_level) || "$"},
+                      </p>
+                    </div>
+                    <div>
+                      {" "}
+                      {/*Distance*/}
+                      <p>
+                        {haversineDistance(
+                          offer.geometry.location.lat,
+                          offer.geometry.location.lng,
+                          latitude,
+                          longitude
+                        )}
+                      </p>
+                    </div>
+                  </div>{" "}
+                  {/*Information end*/}
+                  <div
+                    className={`justify-center items-between inline-flex flex-1 w-full`}
+                  >
+                    {" "}
+                    {/*Information cont*/}
+                    <div className="pr-2">
+                      <p>{toTitleCase(offer.types[0])},</p>
+                    </div>
+                    <div>
+                      <p>{offer.vicinity}</p>
+                    </div>
+                  </div>{" "}
+                  {/*Information cont end*/}
+                  <div
+                    className={`justify-center items-center text-center inline-flex flex-1 w-full`}
+                  >
+                    {" "}
+                    {/*Opening info*/}
+                    <div className="flex justify-center items-center text-center">
+                      <p>
+                        {offer.opening_hours?.open_now
+                          ? "Currently Open"
+                          : "Closed Right Now"}
+                      </p>
+                    </div>
+                  </div>
+                </div>{" "}
+                {/*Opening info end*/}
+              </div>
             ))}
-
           </div>
         ) : (
           <p></p>
-        )} {/*whole food card end*/}
+        )}{" "}
+        {/*whole food card end*/}
       </div>
-      {latitude && longitude && foodOffers.length === 0 &&
-      <div className="h-screen">
-        <div className="h-1/3 grid grid-cols-1 content-center">
-          <button className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] flex justify-center flex items-center gap-2.5 flex p-7"
-            onClick={() => { fetchFoodByLocation(); }}> Find Something to Eat!
-          </button>
+      {latitude && longitude && foodOffers.length === 0 && (
+        <div className="h-full">
+          <div className="h-1/3 grid grid-cols-1 content-center">
+            <button
+              className="bg-[#DADADA] hover:bg-[#CCCCCC] active:bg-[#BBB] rounded-[50px] flex justify-center items-center p-3 px-6 transition-all duration-600 ease-in-out"
+              onClick={() => {
+                fetchFoodByLocation();
+              }}
+            >
+              Find Something to Eat!
+            </button>
+          </div>
         </div>
-      </div>
-      }
+      )}
+      {loading && <p className="pt-60">Finding your next meal...</p>}
+      {!latitude ||
+        (!longitude && (
+          <div className="flex h-screen w-screen items-center justify-center">
+            <div
+              className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-black"
+              role="status"
+            >
+              <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+                Loading...
+              </span>
+            </div>
+          </div>
+        ))}
     </div>
   );
 }
