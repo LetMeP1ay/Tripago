@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import HotelButton from "@/components/HotelButton";
 import HotelCard from "@/components/HotelCard";
@@ -87,7 +87,7 @@ export default function HotelBookings() {
 
   const numFeatured = 3;
   const nonFeaturedOffers = hotelOffers.slice(numFeatured);
-  const query = new URLSearchParams(window.location.search);
+  const query = useSearchParams();
   const cityCode = query.get("cityCode") || "";
   const checkInDate = query.get("checkInDate") || "";
   const checkOutDate = query.get("checkOutDate") || "";
