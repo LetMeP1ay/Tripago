@@ -131,7 +131,7 @@ export default function FindFood() {
       className={`flex-col justify-start items-center inline-flex w-full bg-white text-black md:overflow-x-hidden`}
     >
       {finding && (
-        <div className="text-center text-black">
+        <div className="text-center">
           <p>Finding your location</p>
           <p>
             if this is taking a while make sure you have location enabled on
