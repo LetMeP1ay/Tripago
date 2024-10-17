@@ -48,10 +48,12 @@ export default function FindFood() {
 
   const [foodOffers, setFoodOffers] = useState<FoodOffer[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [finding, setFinding] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [foodImages, setFoodImages] = useState<string[]>([]);
   const [latitude, setLatitude] = useState<number>();
   const [longitude, setLongitude] = useState<number>();
+  const [country, setCountry] = useState<string>();
 
   useEffect(() => {
     const getLocation = async () => {
@@ -70,6 +72,7 @@ export default function FindFood() {
         );
       }
     };
+    setFinding(false);
     getLocation();
   }, []);
 
@@ -141,60 +144,29 @@ export default function FindFood() {
   const numFeatured = 5;
   return (
     <div
-      className={`px-[${gap}] py-[15px] flex-col justify-start items-center gap-[15px] inline-flex w-screen bg-white text-black md:overflow-x-hidden`}
+      className={`px-[${gap}] py-[${gap}] flex-col justify-start items-center gap-[${gap}] inline-flex w-screen bg-white text-black md:overflow-x-hidden`}
     >
-      {loading && <p>Loading...</p>}
-      <div className="justify-between items-center inline-flex w-full">
-        <div>
-          <p>What Would you like to eat?</p>
-        </div>
-
-        <div className="px-[15px] py-2.5 bg-white rounded-[50px] border-2 border-black/10 items-center flex w-1/2">
-          <div className="text-black/50 text-xs font-extrabold font-['Urbanist']">
-            211B Baker Street
-          </div>
-          <img
-            className="w-[15px] h-2.5"
-            src="https://via.placeholder.com/15x10"
-          />
-        </div>
-      </div>
-      <div className="justify-between items-center inline-flex w-full gap-[15px]">
-        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
-          <p>Search Food</p>
-        </div>
-      </div>
-      <div className="justify-between items-center inline-flex w-full gap-[15px]">
-        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
-          <p>Ratings</p>
-        </div>
-        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
-          <p>Open Now</p>
-        </div>
-        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
-          <p>Price</p>
-        </div>
-      </div>
-
+      {finding && <div className="text-center"><p>Finding your location</p><p>if this is taking a while make sure you have location enabled on your device</p></div>}
+      {loading && <p>Finding your next meal.</p>}
       <div>
         {foodOffers?.length > 0 && foodImages?.length ? (
           <div>
             {foodOffers.slice().map((offer, index) => (
                 <div key={offer.place_id} className="pt-[30px]"> {/*whole food card*/}
-                  <div className="relative flex py-5 items-center">
+                  <div className={`relative flex py-[${gap}] items-center`}>
                     <div className="flex-grow border-t border-gray-400"></div>
                     <span className="flex-shrink mx-8 text-gray-600 text-xl font-medium">
                       <h1>{offer.name}</h1> {/*Name*/}
                     </span>
                     <div className="flex-grow border-t border-gray-400"></div>
                   </div>
-                  <div className="flex overflow-x-auto space-x-[15px] w-screen px-[15px]"> {/*Images*/}
+                  <div className="flex justify-center items-center overflow-x-auto space-x-[15px] w-screen px-[15px]"> {/*Images*/}
                     <div className={`${desktopImgSize} flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-hidden`}> {/*Image Div*/}
                       <img className="flex-shrink-0 rounded-[15px] justify-center items-center flex overflow-hidden" src={foodImages[index]} />
                     </div>
                   </div> {/*Images End*/}
                   <div> {/*Bio*/}
-                    <div className="justify-center items-end inline-flex flex-1 w-screen gap-[15px] px-[15px]"> {/*Information*/}
+                    <div className={`justify-center items-end inline-flex flex-1 w-screen gap-[${gap}] px-[${gap}]`}> {/*Information*/}
                       <div> {/*Rating*/}
                         <p className="flex flex-row">
                           {offer.rating}<Rating value={offer.rating || 0} precision={0.1} readOnly className="px-2" />{"("}{offer.user_ratings_total}{")"},
@@ -207,63 +179,45 @@ export default function FindFood() {
                         <p>{haversineDistance(offer.geometry.location.lat, offer.geometry.location.lng, latitude, longitude)}</p>
                       </div>
                     </div> {/*Information end*/}
-                    <div className="justify-center items-between inline-flex flex-1 w-screen gap-[15px] px-[15px]"> {/*Information cont*/}
+                    <div className={`justify-center items-between inline-flex flex-1 w-screen gap-[${gap}] px-[${gap}]`}> {/*Information cont*/}
                       <div>
                         <p>{toTitleCase(offer.types[0])},</p>
                       </div>
                       <div>
                         <p>{offer.vicinity}</p>
                       </div>
-                      <div>
-                        <p>(🧑‍🦽‍➡️)dont think we can have</p>
-                      </div>
                     </div> {/*Information cont end*/}
-                    <div className="justify-center items-between inline-flex flex-1 w-screen gap-[15px] px-[15px]"> {/*Opening info*/}
+                    <div className={`justify-center items-between inline-flex flex-1 w-screen gap-[${gap}] px-[${gap}]`}> {/*Opening info*/}
                       <div>
                         <p>
                           {(
                             offer.opening_hours?.open_now ? (
-                              "Open"
+                              "Currently Open"
                             ) : (
-                              "Closed"
+                              "Closed Right Now"
                             )
                           )}
                         </p>
                       </div>
-                      <div>
-                        <p>-</p>
-                      </div>
-                      <div>
-                        <p>(Closes 10:30 pm) suprisingly i dont think we can have this either</p>
-                      </div>
                     </div>
                   </div> {/*Opening info end*/}
-                  <div className="justify-center items-between inline-flex flex-1 w-screen gap-[15px] px-[15px]"> {/*Action Buttons*/}
-                    <div className="w-1/2 justify-between items-center inline-flex gap-[15px]"> {/*Buttons (restricting to half the screen)*/}
-                      <div className="justify-between items-center inline-flex w-full gap-[15px]"> {/*buttons list */}
-                        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
-                          <p>Directions</p>
-                        </div>
-                        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
-                          <p>Call</p>
-                        </div>
-                        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
-                          <p>Wishlist</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div> {/*Action Buttons end*/}
                 </div>
             ))}
 
           </div>
         ) : (
-          <p>No offers.</p>
+          <p></p>
         )} {/*whole food card end*/}
       </div>
-      <button onClick={() => console.log(foodOffers)}>Print Food offers</button>
-      {latitude && longitude && <button
-        onClick={() => { fetchFoodByLocation(); }}> load </button>}
+      {latitude && longitude && foodOffers.length === 0 &&
+      <div className="h-screen">
+        <div className="h-1/3 grid grid-cols-1 content-center">
+          <button className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] flex justify-center flex items-center gap-2.5 flex p-7"
+            onClick={() => { fetchFoodByLocation(); }}> Find Something to Eat!
+          </button>
+        </div>
+      </div>
+      }
     </div>
   );
 }
