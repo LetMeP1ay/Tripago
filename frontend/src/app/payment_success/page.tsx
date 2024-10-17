@@ -2,14 +2,12 @@
 
 import React, { useState, useContext, useEffect } from "react";
 import Image from "next/image";
-import { NotificationContext } from "@/context/NotificationContext";
 
 export default function PaymentSuccess({
   searchParams: { amount },
 }: {
   searchParams: { amount: string };
 }) {
-  const { addNotification } = useContext(NotificationContext);
   const [currentDate, setCurrentDate] = useState(getDate());
   const [currentTime, setCurrentTime] = useState(getTime());
 
@@ -38,9 +36,6 @@ export default function PaymentSuccess({
         <button
           onClick={() => {
             window.location.href = url;
-            addNotification(
-              `Receipt for $${amount} on ${currentDate} at ${currentTime}`
-            );
           }}
           className="text-white w-full p-5 bg-black mt-2 rounded-md font-bold disabled:opacity-50 disabled:animate-pulse"
         >
