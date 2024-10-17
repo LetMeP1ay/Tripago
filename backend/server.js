@@ -104,7 +104,6 @@ const getFoodInArea = async (latitude, longitude) => {
 
   try {
     const response = await axios.get(placeDetailsUrl);
-    console.log(response);
     return response.data?.results;
   } catch (error) {
     console.error("Error fetching Place Details:", error.message);
@@ -118,21 +117,22 @@ app.get("/api/food-info", async (req, res) => {
   try {
     const foodInfo = await getFoodInArea(lat, lng);
 
-    const photoReferences = foodInfo.map((placeInfo) => placeInfo.photos.map((photo) => photo.photo_reference))
-    const photoWidths = foodInfo.map((placeInfo) => placeInfo.photos.map((photo) => photo.width))
-
-    console.log(photoReferences);
-    console.log(photoWidths);
+    const photoReferences = foodInfo.map((placeInfo) =>
+      placeInfo.photos.map((photo) => photo.photo_reference)
+    );
+    const photoWidths = foodInfo.map((placeInfo) =>
+      placeInfo.photos.map((photo) => photo.width)
+    );
 
     const photoUrls = [];
-    for(i in photoReferences) {
+    for (i in photoReferences) {
       photoUrls.push(getPhotoUrl(photoReferences[i], photoWidths[i]));
     }
 
     if (foodInfo.length === 0) {
       return res.status(404).json({ message: "No Info for this place" });
     }
-    res.json( {foodInfo, photoUrls} );
+    res.json({ foodInfo, photoUrls });
   } catch (error) {
     console.error("Error fetching Food Details:", error.message);
     res.status(500).json({ error: "Failed to fetch food." });
@@ -143,8 +143,13 @@ app.get("/api/hotel-data", async (req, res) => {
   const { hotelName, lat, lng } = req.query;
 
   try {
-    const { placeId, rating, photoReference, photoWidth, streetAddress } =
-      await getPlaceData(hotelName, lat, lng);
+    const {
+      placeId,
+      rating,
+      photoReference,
+      photoWidth,
+      streetAddress,
+    } = await getPlaceData(hotelName, lat, lng);
 
     const photoUrl = getPhotoUrl(photoReference, photoWidth);
 
@@ -278,8 +283,13 @@ app.get("/api/hotel-data", async (req, res) => {
   const { hotelName, lat, lng } = req.query;
 
   try {
-    const { placeId, rating, photoReference, photoWidth, streetAddress } =
-      await getPlaceData(hotelName, lat, lng);
+    const {
+      placeId,
+      rating,
+      photoReference,
+      photoWidth,
+      streetAddress,
+    } = await getPlaceData(hotelName, lat, lng);
 
     const photoUrl = getPhotoUrl(photoReference, photoWidth);
 
@@ -289,8 +299,6 @@ app.get("/api/hotel-data", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch hotel data." });
   }
 });
-
-
 
 app.get("/api/hotels", async (req, res) => {
   try {
