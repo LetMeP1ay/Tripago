@@ -12,7 +12,7 @@ Follow these instructions to set up Tripago on your local machine for developmen
  - npm: Typically comes with Node.js. Verify installation with npm -v.
 
 # Installation
-1. Clone the repository: git clone https://github.com/your-username/tripago.git
+1. Clone the repository: git clone [https://github.com/your-username/tripago.git](https://github.com/LetMeP1ay/Tripago.git)
 2. Navigate to the project directory: cd tripago
 3. Install dependancies: npm i
 4. Create environmental variables: You'll need to create .env files for both the frontend and backend. See the Environment Variables section for more details.

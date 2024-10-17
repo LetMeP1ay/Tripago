@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import axios from "axios";
-import SearchBar from "@/components/SearchBar";
+import FlightSearchBar from "@/components/FlightSearchBar";
 import FlightDetails from "@/components/FlightDetails";
 import { useRouter } from "next/navigation";
-import { getUserHomeCurrency } from "../../services/currencyConversion";
-import CurrencyDropdown from "@/components/CurrencyDropdown";
+import { AuthContext } from "@/context/AuthContext";
+import { CartContext } from "@/context/CartContext";
+import { CartItem } from "@/types";
+import NotificationPopup from "@/components/NotificationPopup";
 
 enum TripType {
   RoundTrip = "1",
@@ -28,27 +30,51 @@ export default function FlightSearch() {
   const [departureDate, setDepartureDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [adults, setAdults] = useState(1);
-  const [currencyCode, setCurrencyCode] = useState<string>("");
   const [flightClass, setFlightClass] = useState<FlightClass>(
     FlightClass.Economy
   );
   const [results, setResults] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [sortBy, setSortBy] = useState<string | undefined>(undefined);
+  const [showNotification, setShowNotification] = useState<boolean>(false);
+  const [confirmChoiceId, setConfirmChoiceId] = useState(null);
+
   const router = useRouter();
+  const { user } = useContext(AuthContext);
+  const { addToCart } = useContext(CartContext);
 
-  useEffect(() => {
-    const getCurrency = async () => {
-      try {
-        const homeCurrency = await getUserHomeCurrency();
-        setCurrencyCode(homeCurrency);
-      } catch (e) {
-        console.error("Failed to fetch home currency", e);
-      }
+  const formatDuration = (duration: string) => {
+    const hoursMatch = duration.match(/(\d+)H/);
+    const minutesMatch = duration.match(/(\d+)M/);
+
+    const hours = Number(hoursMatch ? hoursMatch[1] : 0);
+    const minutes = Number(minutesMatch ? minutesMatch[1] : 0);
+
+    return Number(hours * 60 + minutes);
+  };
+
+  const handleAddToCart = (flight: any) => {
+    if (!user) {
+      alert("Please log in to add items to your cart.");
+      return;
+    }
+    const cartItem: CartItem = {
+      id: flight.id,
+      type: "flight",
+      flight: {
+        flightData: flight,
+        carriers: results.dictionaries.carriers,
+        aircraft: results.dictionaries.aircraft,
+      },
     };
-    getCurrency();
-  }, []);
 
+    addToCart(cartItem);
+    setShowNotification(true);
+  };
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    setLoading(true);
 
     const queryParams: Record<string, any> = {
       originLocationCode: origin,
@@ -56,7 +82,6 @@ export default function FlightSearch() {
       departureDate,
       adults,
       travelClass: flightClass,
-      currencyCode,
     };
 
     if (tripType === TripType.RoundTrip && returnDate) {
@@ -68,6 +93,7 @@ export default function FlightSearch() {
     try {
       const response = await axios.get(endpoint, { params: queryParams });
       setResults(response.data);
+      setLoading(false);
     } catch (e) {
       console.error("Error fetching flight data:", e);
     }
@@ -88,10 +114,29 @@ export default function FlightSearch() {
     router.push(`/hotels?${queryString}`);
   };
 
+  const sortedResults = results?.data
+    ? [...results.data].sort((a, b) => {
+        if (sortBy === "price") {
+          return parseFloat(a.price.total) - parseFloat(b.price.total);
+        } else if (sortBy === "departure") {
+          return (
+            new Date(a.itineraries[0].segments[0].departure.at).getTime() -
+            new Date(b.itineraries[0].segments[0].departure.at).getTime()
+          );
+        } else if (sortBy === "duration") {
+          return (
+            formatDuration(a.itineraries[0].duration) -
+            formatDuration(b.itineraries[0].duration)
+          );
+        }
+        return 0;
+      })
+    : [];
+
   return (
     <div
-      className={`flex flex-col bg-white p-4 text-black items-center justify-center font-inter ${
-        results ? "h-auto w-auto" : "h-screen w-screen"
+      className={`flex flex-col bg-white p-6 text-black items-center justify-center font-inter ${
+        results ? "h-auto w-auto" : "h-full w-full"
       }`}
     >
       <div className="flex justify-between shadow-lg rounded-[32px] w-full md:w-96 mb-14">
@@ -126,14 +171,12 @@ export default function FlightSearch() {
           Multi-City
         </button>
       </div>
-      {/* The flight search component that is responsible for reading user's input of the flight data */}
       <form
         onSubmit={handleSubmit}
         className="flex flex-col w-80 rounded-xl shadow-2xl pt-8 pb-8 p-4 mb-16"
       >
         <div className="pb-[31px]">
-          {/* Search bar component is used for creating the input fields for the users */}
-          <SearchBar
+          <FlightSearchBar
             type="text"
             value={origin}
             onChange={(value) => setOrigin(value)}
@@ -141,7 +184,7 @@ export default function FlightSearch() {
         </div>
 
         <div className="pb-[31px]">
-          <SearchBar
+          <FlightSearchBar
             type="text"
             label="To"
             value={destination}
@@ -150,7 +193,7 @@ export default function FlightSearch() {
         </div>
 
         <div className="pb-[31px]">
-          <SearchBar
+          <FlightSearchBar
             type="date"
             label="Departure"
             value={departureDate}
@@ -160,7 +203,7 @@ export default function FlightSearch() {
 
         {tripType === TripType.RoundTrip && (
           <div className="pb-[31px]">
-            <SearchBar
+            <FlightSearchBar
               type="date"
               label="Return"
               value={returnDate}
@@ -171,7 +214,7 @@ export default function FlightSearch() {
 
         <div className="flex flex-row">
           <div className="w-full mr-[4.5px]">
-            <SearchBar
+            <FlightSearchBar
               type="count"
               label="Traveler"
               value={adults}
@@ -180,7 +223,7 @@ export default function FlightSearch() {
           </div>
 
           <div className="w-full ml-[4.5px] pb-[31px]">
-            <SearchBar
+            <FlightSearchBar
               type="dropdown"
               label="Class"
               value={flightClass}
@@ -195,42 +238,77 @@ export default function FlightSearch() {
         >
           Search
         </button>
-        {/* Another encapsulated component that is responsible for updating user's currency */}
-        <CurrencyDropdown
-          selectedCurrency={currencyCode}
-          onCurrencyChange={setCurrencyCode}
-        />
       </form>
-      {/* Function that maps the response of Amadeus API in a flight details component if results exist (when we receive the response) */}
+      {loading && <p>Looking for tickets...</p>}
       {results && (
-        <div className="w-full lg:w-auto p-4 flex flex-col items-center justify-center">
-          {results?.data?.map((flight: any) => (
+        <div className="w-full lg:w-auto p-4 flex flex-col items-end justify-center">
+          <div className="flex justify-end mb-4">
+            <select
+              className="border p-2 rounded"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="price">Price</option>
+              <option value="departure">Earliest Departure</option>
+              <option value="duration">Duration</option>
+            </select>
+          </div>
+
+          {sortedResults?.map((flight: any) => (
             <div key={flight.id} className="w-full flex flex-col items-center">
-              {/* Component that renders the response itself */}
               <FlightDetails
                 flight={flight}
                 carriers={results.dictionaries.carriers}
                 aircraft={results.dictionaries.aircraft}
               />
-              <button
-                className="rounded-lg bg-[#71D1FC] mb-8 w-full lg:w-1/6 p-3 text-sm font-medium text-white transition-all duration-600 ease-in-out hover:bg-[#5BBEEB] active:bg-[#4DAED3] ml-auto"
-                onClick={() =>
-                  handleSelectTicket(
-                    flight.itineraries[0].segments[
-                      flight.itineraries[0].segments.length - 1
-                    ].arrival.iataCode,
-                    flight.itineraries[0].segments[
-                      flight.itineraries[0].segments.length - 1
-                    ].arrival.at
-                  )
-                }
-              >
-                Select
-              </button>
+              {confirmChoiceId !== flight.id ? (
+                <button
+                  className="rounded-lg bg-[#71D1FC] mb-8 w-full lg:w-1/6 p-3 text-sm font-medium text-white transition-all duration-600 ease-in-out hover:bg-[#5BBEEB] active:bg-[#4DAED3] ml-auto"
+                  onClick={() => setConfirmChoiceId(flight.id)}
+                >
+                  Add to Cart
+                </button>
+              ) : (
+                <div className="flex flex-col items-center mb-8">
+                  <p className="mb-2">Would you like to select a hotel?</p>
+                  <div className="flex space-x-2">
+                    <button
+                      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                      onClick={() => {
+                        handleAddToCart(flight);
+                        handleSelectTicket(
+                          flight.itineraries[0].segments[
+                            flight.itineraries[0].segments.length - 1
+                          ].arrival.iataCode,
+                          flight.itineraries[0].segments[
+                            flight.itineraries[0].segments.length - 1
+                          ].arrival.at
+                        );
+                      }}
+                    >
+                      Yes
+                    </button>
+                    <button
+                      className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                      onClick={() => {
+                        handleAddToCart(flight);
+                        setConfirmChoiceId(null);
+                      }}
+                    >
+                      No
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
+      <NotificationPopup
+        message="Flight added to cart successfully!"
+        onClose={() => setShowNotification(false)}
+        show={showNotification}
+      />
     </div>
   );
 }

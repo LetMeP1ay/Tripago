@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 
 interface AirlineLogoProps {
@@ -43,7 +45,11 @@ export default function AirlineLogo({ airlineName }: AirlineLogoProps) {
   return (
     <div>
       {airlineLogo ? (
-        <img src={airlineLogo} alt={airlineName} className="w-12 h-12 rounded-lg"/>
+        <img
+          src={airlineLogo}
+          alt={airlineName}
+          className="w-12 h-12 rounded-lg"
+        />
       ) : (
         <p>Logo not available</p>
       )}

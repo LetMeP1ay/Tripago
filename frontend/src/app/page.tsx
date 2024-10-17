@@ -206,7 +206,6 @@ export default function Map() {
 
   return (
     <div className="flex flex-col h-screen relative">
-      <TopBar />
       {/* Map Container */}
       <div
         className="flex-grow h-full"

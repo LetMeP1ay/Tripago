@@ -16,7 +16,6 @@ export function getUserLocation(): Promise<GeolocationPosition> {
     const data = await response.json();
     return data.results[0].components.country_code.toUpperCase();
   }
-  
   export async function getUserCoords(): Promise<number[]> {
     try {
       const position = await getUserLocation();

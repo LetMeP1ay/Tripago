@@ -1,7 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  ChangeEvent,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import HotelButton from "@/components/HotelButton";
+import HotelCard from "@/components/HotelCard";
+import HotelSearchBar from "@/components/HotelSearchBar";
+import { VscSettings } from "react-icons/vsc";
+import { CartItem } from "@/types";
+import { AuthContext } from "@/context/AuthContext";
+import { CartContext } from "@/context/CartContext";
+import NotificationPopup from "@/components/NotificationPopup";
 
 interface HotelOffer {
   type: string;
@@ -36,54 +52,152 @@ interface HotelOffer {
   self: string;
 }
 
-interface HotelRating {
-  hotelId: string;
-  overallRating: number;
-  numberOfReviews: number;
-  sentiments: {
-    staff: number;
-    location: number;
-    service: number;
-    roomComforts: number;
-    internet: number;
-    sleepQuality: number;
-    valueForMoney: number;
-    facilities: number;
-    catering: number;
-    pointsOfInterest: number;
-  };
-}
-
-interface RatingWarning {
-  code: number;
-  title: string;
-  detail: string;
-  source: {
-    parameter: string;
-    pointer: string;
-  };
-}
-
 const BATCH_SIZE = 15;
-const RATING_BATCH_SIZE = 3;
+
+interface HotelData {
+  image: string;
+  rating: number;
+  streetAddress: string;
+}
 
 export default function HotelBookings() {
   const router = useRouter();
 
+  const hotelOffersRef = useRef<HotelOffer[]>([]);
+  const hotelDataRef = useRef<Record<string, HotelData>>({});
+  const [selectedFilter, setSelectedFilter] = useState<string>("Hotel");
+  const [additionalQueryParams, setAdditionalQueryParams] = useState<
+    Record<string, string>
+  >({});
+  const { user } = useContext(AuthContext);
+  const { addToCart } = useContext(CartContext);
+
+  const [hotelOffers, setHotelOffers] = useState<HotelOffer[]>([]);
+  const [addressInput, setAddressInput] = useState<string>("");
+  const [hotelData, setHotelData] = useState<Record<string, HotelData>>({});
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [allHotelIds, setAllHotelIds] = useState<string[]>([]);
+  const [currentBatch, setCurrentBatch] = useState<number>(0);
+  const [countryCode, setCountryCode] = useState<string>("");
+  const [sortBy, setSortBy] = useState<string>("price");
+  const [isFilterDropdownOpen, setIsFilterDropdownOpen] =
+    useState<boolean>(false);
+  const [showNotification, setShowNotification] = useState(false);
+
+  const numFeatured = 3;
+  const nonFeaturedOffers = hotelOffers.slice(numFeatured);
   const query = new URLSearchParams(window.location.search);
   const cityCode = query.get("cityCode") || "";
   const checkInDate = query.get("checkInDate") || "";
   const checkOutDate = query.get("checkOutDate") || "";
   const adults = query.get("adults") || "1";
 
-  const [hotelOffers, setHotelOffers] = useState<HotelOffer[]>([]);
-  const [hotelRatings, setHotelRatings] = useState<HotelRating[]>([]);
-  const [ratingWarnings, setRatingWarnings] = useState<RatingWarning[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [allHotelIds, setAllHotelIds] = useState<string[]>([]);
-  const [currentBatch, setCurrentBatch] = useState<number>(0);
-  const [hotelImages, setHotelImages] = useState<Record<string, string[]>>({});
+  const handleSortChange = (sortOption: string) => {
+    setSortBy(sortOption);
+    setIsFilterDropdownOpen(false);
+  };
+
+  const handleAddToCart = (
+    offer: HotelOffer,
+    image: string,
+    streetAddress: string,
+    featured: boolean,
+    rating?: number
+  ) => {
+    if (!user) {
+      alert("Please log in to add items to your cart.");
+      return;
+    }
+
+    const cartItem: CartItem = {
+      id: offer.hotel.hotelId,
+      type: "hotel",
+      hotel: {
+        offer,
+        image,
+        streetAddress,
+        featured,
+        rating,
+      },
+    };
+
+    addToCart(cartItem);
+    setShowNotification(true);
+  };
+
+  const handleFilterClick = (filterLabel: string) => {
+    setSelectedFilter(filterLabel);
+
+    let queryParams: Record<string, string> = {};
+
+    switch (filterLabel) {
+      case "Hotel":
+        queryParams = { bestRateOnly: "true" };
+        break;
+      case "Apartments":
+        queryParams = { roomQuantity: "1", priceRange: "50-150" };
+        break;
+      case "Condo":
+        queryParams = { roomQuantity: "2", priceRange: "150-300" };
+        break;
+      case "Mansion":
+        queryParams = { roomQuantity: "3", priceRange: "300-1000" };
+        break;
+      default:
+        queryParams = {};
+    }
+
+    setAdditionalQueryParams(queryParams);
+
+    setHotelOffers([]);
+    setHotelData({});
+    setCurrentBatch(0);
+    hotelOffersRef.current = [];
+    hotelDataRef.current = {};
+
+    fetchOffersWithFilters(queryParams);
+  };
+
+  const fetchOffersWithFilters = async (
+    extraParams: Record<string, string>
+  ) => {
+    const hotelIds = await fetchHotelsByCity();
+    setAllHotelIds(hotelIds);
+    setCurrentBatch(0);
+
+    let batchNumber = 0;
+    const totalBatches = Math.ceil(hotelIds?.length / BATCH_SIZE);
+
+    while (
+      batchNumber < totalBatches &&
+      (!hasEnoughFeatured() || !hasEnoughNonFeatured())
+    ) {
+      const startIndex = batchNumber * BATCH_SIZE;
+      const endIndex = startIndex + BATCH_SIZE;
+      const batchHotelIds = hotelIds?.slice(startIndex, endIndex);
+
+      await fetchHotelOffers(batchHotelIds, extraParams);
+      setCurrentBatch((prevBatch) => prevBatch + 1);
+
+      batchNumber++;
+    }
+  };
+
+  const sortByDisplayName = (sortOption: string) => {
+    switch (sortOption) {
+      case "price":
+        return "Price";
+      case "rating":
+        return "Rating";
+      case "name":
+        return "Name (A-Z)";
+      case "name_desc":
+        return "Name (Z-A)";
+      default:
+        return "Select";
+    }
+  };
 
   const fetchHotelsByCity = async (): Promise<string[]> => {
     try {
@@ -94,6 +208,13 @@ export default function HotelBookings() {
       const hotelIds = data?.data?.map(
         (hotel: { hotelId: string }) => hotel.hotelId
       );
+
+      if (data?.data?.length > 0) {
+        const countryCodeFromResponse =
+          data.data[0]?.address?.countryCode || "";
+        setCountryCode(countryCodeFromResponse);
+      }
+
       return hotelIds;
     } catch (error) {
       console.error("Error fetching hotels by city:", error);
@@ -102,8 +223,11 @@ export default function HotelBookings() {
     }
   };
 
-  const fetchHotelOffers = async (hotelIds: string[]) => {
-    if (!cityCode || !checkInDate || hotelIds.length === 0) {
+  const fetchHotelOffers = async (
+    hotelIds: string[],
+    extraParams: Record<string, string>
+  ) => {
+    if ((!cityCode && hotelIds?.length === 0) || !checkInDate) {
       setError("Missing city code, dates, or hotel IDs.");
       return;
     }
@@ -111,7 +235,7 @@ export default function HotelBookings() {
     setLoading(true);
     setError(null);
 
-    const hotelIdsParam = hotelIds.join(",");
+    const hotelIdsParam = hotelIds?.join(",");
 
     let queryString = `hotelIds=${hotelIdsParam}&checkInDate=${checkInDate}&adults=${adults}`;
 
@@ -126,15 +250,19 @@ export default function HotelBookings() {
       const data = await response.json();
 
       if (data.data && Array.isArray(data.data)) {
-        setHotelOffers((prevOffers) => [...prevOffers, ...data.data]);
+        const availableOffers = data.data.filter(
+          (offer: HotelOffer) => offer.available
+        );
+
+        setHotelOffers((prevOffers) => {
+          const newOffers = [...prevOffers, ...availableOffers];
+          hotelOffersRef.current = newOffers;
+          return newOffers;
+        });
+
         setError(null);
 
-        const availableHotelIds = data.data
-          .filter((offer: HotelOffer) => offer.available)
-          .map((offer: HotelOffer) => offer.hotel.hotelId);
-
-        await fetchHotelRatingsInBatches(availableHotelIds);
-        await fetchImagesForHotels(data.data);
+        await fetchHotelDataForHotels(availableOffers);
       } else {
         setError("No hotel offers found.");
       }
@@ -146,64 +274,121 @@ export default function HotelBookings() {
     }
   };
 
-  const fetchHotelRatings = async (hotelIds: string[]) => {
-    if (hotelIds.length === 0) return;
-
-    try {
-      const hotelIdsParam = hotelIds.join(",");
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/hotel-ratings?hotelIds=${hotelIdsParam}`
-      );
-      const data = await response.json();
-
-      if (data.data && Array.isArray(data.data)) {
-        setHotelRatings((prevRatings) => [...prevRatings, ...data.data]);
-      }
-
-      if (data.warnings && Array.isArray(data.warnings)) {
-        setRatingWarnings((prevWarnings) => [
-          ...prevWarnings,
-          ...data.warnings,
-        ]);
-      }
-    } catch (error) {
-      console.error("Error fetching hotel ratings:", error);
-    }
-  };
-
-  const fetchHotelRatingsInBatches = async (hotelIds: string[]) => {
-    for (let i = 0; i < hotelIds.length; i += RATING_BATCH_SIZE) {
-      const batch = hotelIds.slice(i, i + RATING_BATCH_SIZE);
-      await fetchHotelRatings(batch);
-    }
-  };
-
   const fetchNextBatch = async () => {
     const startIndex = currentBatch * BATCH_SIZE;
     const endIndex = startIndex + BATCH_SIZE;
-    const batch = allHotelIds.slice(startIndex, endIndex);
-    if (batch.length > 0) {
-      await fetchHotelOffers(batch);
+    const batch = allHotelIds?.slice(startIndex, endIndex);
+    if (batch?.length > 0) {
+      await fetchHotelOffers(batch, additionalQueryParams);
       setCurrentBatch(currentBatch + 1);
     }
   };
 
-  const fetchImagesForHotels = async (hotelOffers: HotelOffer[]) => {
+  const sortedNonFeaturedOffers = useMemo(() => {
+    const offers = [...nonFeaturedOffers];
+
+    offers.sort((a, b) => {
+      const hotelDataA = hotelData[a.hotel.hotelId] || {};
+      const hotelDataB = hotelData[b.hotel.hotelId] || {};
+
+      const ratingA = hotelDataA.rating || 0;
+      const ratingB = hotelDataB.rating || 0;
+
+      const nameA = a.hotel.name.toLowerCase();
+      const nameB = b.hotel.name.toLowerCase();
+
+      const priceA =
+        a.offers && a.offers[0]?.price?.total
+          ? parseFloat(a.offers[0].price.total)
+          : Infinity;
+      const priceB =
+        b.offers && b.offers[0]?.price?.total
+          ? parseFloat(b.offers[0].price.total)
+          : Infinity;
+
+      switch (sortBy) {
+        case "price":
+          return priceA - priceB;
+        case "rating":
+          return ratingB - ratingA;
+        case "name":
+          return nameA.localeCompare(nameB);
+        case "name_desc":
+          return nameB.localeCompare(nameA);
+        default:
+          return 0;
+      }
+    });
+
+    return offers;
+  }, [nonFeaturedOffers, hotelData, sortBy]);
+
+  const filteredNonFeaturedOffers = useMemo(() => {
+    return sortedNonFeaturedOffers.filter((offer) => {
+      const hotelId = offer.hotel.hotelId;
+      const data = hotelData[hotelId];
+
+      if (!data || !data.streetAddress) {
+        return false;
+      }
+
+      if (addressInput.trim() === "") {
+        return true;
+      }
+
+      return data.streetAddress
+        .toLowerCase()
+        .includes(addressInput.toLowerCase());
+    });
+  }, [sortedNonFeaturedOffers, hotelData, addressInput]);
+
+  const fetchHotelDataForHotels = async (hotelOffers: HotelOffer[]) => {
     try {
       for (let offer of hotelOffers) {
-        const { name, latitude, longitude } = offer.hotel;
+        const { name, latitude, longitude, hotelId } = offer.hotel;
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/hotel-images?hotelName=${name}&lat=${latitude}&lng=${longitude}`
+          `${
+            process.env.NEXT_PUBLIC_API_URL
+          }/api/hotel-data?hotelName=${encodeURIComponent(
+            name
+          )}&lat=${latitude}&lng=${longitude}`
         );
         const data = await response.json();
-        setHotelImages((prevImages) => ({
-          ...prevImages,
-          [offer.hotel.hotelId]: data.photos || [],
-        }));
+        const { photoUrl, rating, streetAddress } = data;
+
+        setHotelData((prevData) => {
+          const newData = {
+            ...prevData,
+            [hotelId]: {
+              image: photoUrl,
+              rating: rating,
+              streetAddress: streetAddress,
+            },
+          };
+          hotelDataRef.current = newData;
+          return newData;
+        });
       }
     } catch (error) {
-      console.error("Error fetching hotel images:", error);
+      console.error("Error fetching hotel data:", error);
     }
+  };
+
+  const handleHotelSelect = async (hotelIds: string[]) => {
+    await fetchHotelOffers(hotelIds, additionalQueryParams);
+  };
+  const hasEnoughFeatured = () => {
+    const availableOffers = hotelOffersRef.current.filter(
+      (offer) => offer.available
+    );
+    return availableOffers.slice(0, numFeatured).length >= numFeatured;
+  };
+
+  const hasEnoughNonFeatured = () => {
+    const availableOffers = hotelOffersRef.current.filter(
+      (offer) => offer.available
+    );
+    return availableOffers.slice(numFeatured).length >= 4;
   };
 
   useEffect(() => {
@@ -211,199 +396,265 @@ export default function HotelBookings() {
       const hotelIds = await fetchHotelsByCity();
       setAllHotelIds(hotelIds);
       setCurrentBatch(0);
-      if (hotelIds.length > 0) {
-        await fetchNextBatch();
+
+      let batchNumber = 0;
+      const totalBatches = Math.ceil(hotelIds?.length / BATCH_SIZE);
+
+      while (
+        batchNumber < totalBatches &&
+        (!hasEnoughFeatured() || !hasEnoughNonFeatured())
+      ) {
+        const startIndex = batchNumber * BATCH_SIZE;
+        const endIndex = startIndex + BATCH_SIZE;
+        const batchHotelIds = hotelIds?.slice(startIndex, endIndex);
+
+        await fetchHotelOffers(batchHotelIds, additionalQueryParams);
+        setCurrentBatch((prevBatch) => prevBatch + 1);
+
+        batchNumber++;
       }
     };
 
     fetchOffersInBatches();
   }, [cityCode, checkInDate, checkOutDate]);
 
-  const gap = "15px";
-  const numFeatured = 3;
-  const dispNum = 3
-  return (
-    <div className={`px-[${gap}] py-[15px] flex-col justify-start items-center gap-[15px] inline-flex w-screen ${hotelOffers.length > 0 ? "h-auto": "h-screen"} bg-white text-black`}>
-      <div className="justify-between items-center inline-flex w-full">
-          <div>
-            <p>Discover your</p>
-            <p>perfect place to stay</p>
-          </div>
-          
-        <div className="px-[15px] py-2.5 bg-white rounded-[50px] border-2 border-black/10 items-center flex w-1/2">
-          <div className="text-black/50 text-xs font-extrabold font-['Urbanist']">211B Baker Street</div>
-          <img className="w-[15px] h-2.5" src="https://via.placeholder.com/15x10" />
-        </div>
-      </div>
-      <div className="justify-between items-center inline-flex w-full gap-[15px]">
-        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
-          <p>Search Hotel</p>
-        </div>
-        <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex">
-          <p>Open Map</p>
-        </div>
-      </div>
-        <div className="justify-between items-center inline-flex w-full gap-[15px]">
-          <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Hotel</p></div>
-          <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Apartments</p></div>
-          <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Condo</p></div>
-          <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Mansion</p></div>
-          <div className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] justify-center items-center gap-2.5 flex"><p>Mansion</p></div>
-      </div>
-      {/*
-      sdfsdfsdfdgsdfgfdsg
-        <div className="w-[272px] h-[152px] relative rounded-[10px] overflow-y-hidden">
-          <img className="w-[272px] h-[204px] left-0 top-[-13px] absolute" src="https://via.placeholder.com/272x204" />
-          <div className="absolute justify-between items-end gap-[120px] inline-flex w-full px-[15px] py-[12px] h-full text-white">
-            <div className="left-[14px] left-0 text-base font-medium">
-              <p>NAME</p>
-              <p>$PRICE</p>
-            </div>
-            <div className="justify-left items-left flex text-left">
-              <p>⭐RATING</p>
-            </div>
-          </div>
-        </div>
-        dsjgvfsdfghvsdfghvgh
-      <div className="justify-between items-center gap-3.5 inline-flex w-full">
-        <div className="w-175 h-175 rounded-[15px] justify-end items-center flex overflow-y-hidden">
-          <img className="w-[175] h-[175]" src="https://via.placeholder.com/175x175" />
-        </div>
-        <div className="relative items-start justify-start">
-          <p>NAME OF HOTEL</p>
-          <p>Location of hotel</p>
-        </div>
-        <div className="relative justify-end items-end">
-          <p>$PRICE</p>
-          <p>⭐RATING</p>
-        </div>
-      </div>
-      hgdbfnkbmvjdhsbfnm gkhbjvhgcbx df*/}
-      {loading && <p>Loading...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const dropdownElement = document.getElementById("filter-dropdown");
+      if (dropdownElement && !dropdownElement.contains(event.target as Node)) {
+        setIsFilterDropdownOpen(false);
+      }
+    };
 
-      {hotelOffers.length > 0 && (
-        <div className={`grid grid-cols-1 lg:grid-cols-${numFeatured} gap-4 mb-8`}>
-          {hotelOffers.slice(0, numFeatured).map((offer) => (
-            //put the smaller cards in a div that is a 3 colom wide at large size and 1 wide when its thin
-            // make the image the size of its box, with a matching height to stop the overlapping with name
-            <div key={offer.hotel.hotelId} className="w-[272px] h-[150px] relative overflow-y-hidden rounded-[10px]">
-              {hotelImages[offer.hotel.hotelId] &&
-              hotelImages[offer.hotel.hotelId].length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {hotelImages[offer.hotel.hotelId].map((imageUrl, index) => (
-                    <img
-                      key={index}
-                      src={imageUrl}
-                      alt={`Hotel ${offer.hotel.name} image ${index + 1}`}
-                      className={` ${
-                        index === 0 ? "w-90 h-90 object-cover rounded-[10px]" : "hidden"
-                      }`}
-                    />
-                  ))}
-                  <div className="absolute justify-between items-start flex flex-col w-full px-[15px] h-full text-white bg-black bg-opacity-50">
-                  <p className="text-xs font-light">{offer.hotel.name}</p>
-                  <div className="text-xs left-[14px] left-0 text-base font-light">
-                  
-                  {offer.available && offer.offers ? (
-                    offer.offers.map((singleOffer) => (
-                      <>
-                        <div
-                          key={singleOffer.id}
-                        >
-                          <p>
-                            Price: {singleOffer.price.total}{" "}
-                            {singleOffer.price.currency}
-                          </p>
-                        </div>
-                        <div className="justify-left items-left flex text-left">
-                          <h3 className="font-semibold">
-                            Rating: ⭐4.8
-                          </h3>
-                        </div>
-                      </>
-                    ))
-                  ) : (
-                    <p>No offers available for this hotel.</p>
-                  )}
-                  
-                </div>
-                  </div>
-                </div>
-              ) : (
-                <p>No images available for this hotel.</p>
-              )}
-              
-                
-                
-            </div>
+    if (isFilterDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isFilterDropdownOpen]);
+
+  return (
+    <div
+      className={`flex-col justify-start items-center gap-[15px] inline-flex w-full p-6 ${
+        hotelOffers.length > 0 ? "h-auto" : "h-full"
+      } bg-white text-black`}
+    >
+      <div className="flex justify-between items-center w-full md:text-xl">
+        <div>
+          <p className="opacity-50">Discover your</p>
+          <p className="font-bold">perfect place to stay</p>
+        </div>
+
+        <div className="px-[15px] py-2.5 bg-white rounded-[50px] border-2 border-black/10 flex items-center w-1/2">
+          <input
+            className="text-black/50 text-xs md:text-xl font-bold w-full outline-none"
+            placeholder="Search by address"
+            value={addressInput}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setAddressInput(e.target.value)
+            }
+          />
+          <Image
+            alt="icon"
+            src="/Arrow.svg"
+            height={20}
+            width={20}
+            className="h-3 w-3 md:h-5 md:w-5 rotate-90"
+          />
+        </div>
+      </div>
+      <div className="flex w-full gap-[15px] mt-4">
+        <div className="w-1/2 h-10 bg-[#ebebeb] rounded-[50px] flex items-center gap-2.5 p-2.5">
+          <HotelSearchBar
+            countryCode={countryCode}
+            onHotelSelect={handleHotelSelect}
+          />
+        </div>
+
+        <button
+          className="transition-all duration-600 ease-in-out w-1/2 h-10 bg-[#ebebeb] hover:bg-[#DADADA] active:bg-[#CCCCCC] rounded-[50px] flex justify-center items-center gap-2.5"
+          onClick={() => router.push("/")}
+        >
+          <p className="w-full text-center opacity-50">Open Map</p>
+        </button>
+      </div>
+      <div className="flex justify-between items-center w-full gap-[15px] text-xs md:text-lg md:mt-12 overflow-x-scroll md:overflow-hidden scrollbar mt-4">
+        <div className="flex w-max md:w-full h-full">
+          {["Hotel", "Apartments", "Condo", "Mansion"].map((label) => (
+            <HotelButton
+              key={label}
+              label={label}
+              isActive={selectedFilter === label}
+              onClick={() => handleFilterClick(label)}
+            />
           ))}
         </div>
-      )}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
-      {hotelOffers.length > 3 &&
-        hotelOffers.slice(numFeatured).map((offer) => (
-          <div key={offer.hotel.hotelId} className="justify-between items-center flex flex-wrap w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-center w-full">
-            {hotelImages[offer.hotel.hotelId] &&
-            hotelImages[offer.hotel.hotelId].length > 0 ? (
-              
-              <div className="flex gap-2  relative overflow-y-hidden overflow-x-hidden rounded-[10px] w-[90px] h-[90px] lg:w-[135px] lg:h-[135px]">
-                {hotelImages[offer.hotel.hotelId].map((imageUrl, index) => (
-                  <img
-                    key={index}
-                    src={imageUrl}
-                    alt={`Hotel ${offer.hotel.name} image ${index + 1}`}
-                    className={` ${
-                      index === 0 ? "w-90 h-90 w-135 h-135 object-cover" : "hidden"
-                    }`}
-                  />
-                ))}
-                </div>
-            ) : (
-              <p>No images available for this hotel.</p>
-            )}
-              <p className="font-normal items-center justify-center text-center">{offer.hotel.name}</p>
-            {offer.available && offer.offers ? (
-              offer.offers.map((singleOffer) => (
-                <div key={singleOffer.id} className="flex flex-col justify-center items-end text-end">
-                  <p>
-                    Price: {singleOffer.price.total}{" "}
-                    {singleOffer.price.currency}
-                  </p>
-                  <p>
-                    Rating: ⭐4.8
-                  </p>
-                </div>
-              ))
-            ) : (
-              <p>No offers available for this hotel.</p>
-            )}
-            </div>
+      </div>
+      {loading && <p>Loading...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+      {hotelOffers.length > 0 && (
+        <div className="flex w-full overflow-x-scroll md:overflow-hidden scrollbar md:justify-center">
+          <div className="flex gap-4">
+            {hotelOffers
+              .filter((offer) => offer.available)
+              .slice(0, numFeatured)
+              .map((offer) => {
+                const hotelId = offer.hotel.hotelId;
+                const data = hotelData[hotelId] || {};
+                const image = data.image || "";
+                const rating = data.rating || null;
+                const streetAddress = data.streetAddress || "";
 
-            {hotelRatings
-              .filter((rating) => rating.hotelId === offer.hotel.hotelId)
-              .map((rating) => (
-                <div
-                  key={rating.hotelId}
-                  className="p-2 mt-2 border border-gray-200"
-                >
-                  <h3 className="font-semibold">
-                    Rating: {rating.overallRating}%
-                  </h3>
-                </div>
-              ))}
+                return (
+                  <div
+                    key={hotelId}
+                    className="flex-shrink-0 cursor-pointer"
+                    onClick={() =>
+                      handleAddToCart(
+                        offer,
+                        image,
+                        streetAddress,
+                        false,
+                        rating || 0
+                      )
+                    }
+                  >
+                    <HotelCard
+                      offer={offer}
+                      streetAddress={streetAddress}
+                      image={image}
+                      rating={rating || 0}
+                      featured={true}
+                    />
+                  </div>
+                );
+              })}
           </div>
-        ))}
         </div>
-      {currentBatch * BATCH_SIZE < allHotelIds.length && (
+      )}
+      <div className="flex w-full justify-between items-center font-Urbanist">
+        <p className="font-bold text-2xl">Hotels Nearby</p>
+        <div className="relative inline-block text-left">
+          <button
+            className="relative flex justify-center items-center bg-[#ebebeb]  hover:bg-[#DADADA] active:bg-[#BBB] opacity-50 rounded-[50px] p-3 px-8 transition-all duration-600 ease-in-out"
+            onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
+          >
+            <p>Filter: {sortByDisplayName(sortBy)}</p>
+            <VscSettings className="rotate-[90deg] h-6 w-6" />
+          </button>
+
+          {isFilterDropdownOpen && (
+            <div
+              id="filter-dropdown"
+              className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+            >
+              <div
+                className="py-1"
+                role="menu"
+                aria-orientation="vertical"
+                aria-labelledby="options-menu"
+              >
+                <button
+                  className={`w-full text-left px-4 py-2 text-sm ${
+                    sortBy === "price"
+                      ? "bg-gray-200 text-gray-900"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                  onClick={() => handleSortChange("price")}
+                >
+                  Price
+                </button>
+                <button
+                  className={`w-full text-left px-4 py-2 text-sm ${
+                    sortBy === "rating"
+                      ? "bg-gray-200 text-gray-900"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                  onClick={() => handleSortChange("rating")}
+                >
+                  Rating
+                </button>
+                <button
+                  className={`w-full text-left px-4 py-2 text-sm ${
+                    sortBy === "name"
+                      ? "bg-gray-200 text-gray-900"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                  onClick={() => handleSortChange("name")}
+                >
+                  Name (A-Z)
+                </button>
+                <button
+                  className={`w-full text-left px-4 py-2 text-sm ${
+                    sortBy === "name_desc"
+                      ? "bg-gray-200 text-gray-900"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                  onClick={() => handleSortChange("name_desc")}
+                >
+                  Name (Z-A)
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      {filteredNonFeaturedOffers.length > 0 && (
+        <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+          {filteredNonFeaturedOffers.map((offer) => {
+            const hotelId = offer.hotel.hotelId;
+            const data = hotelData[hotelId] || {};
+            const image = data.image || "";
+            const rating = Number(data.rating) || 0;
+            const streetAddress = data.streetAddress || "";
+
+            return (
+              <div key={hotelId}>
+                <HotelCard
+                  streetAddress={streetAddress}
+                  offer={offer}
+                  image={image}
+                  rating={rating || 0}
+                  featured={false}
+                />
+                <div className="w-full flex justify-end items-center">
+                  <button
+                    className="w-1/4 rounded-lg bg-[#71D1FC] mb-8 p-3 text-sm font-medium text-white transition-all duration-600 ease-in-out hover:bg-[#5BBEEB] active:bg-[#4DAED3] ml-auto"
+                    onClick={() =>
+                      handleAddToCart(
+                        offer,
+                        image,
+                        streetAddress,
+                        false,
+                        rating || 0
+                      )
+                    }
+                  >
+                    Add to Cart
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {currentBatch * BATCH_SIZE < allHotelIds?.length && (
         <button
           onClick={fetchNextBatch}
-          className="bg-blue-500 text-white rounded-lg p-2 mt-4"
+          className="bg-[#71D1FC] hover:bg-[#5BBEEB] active:bg-[#5AAEEA] transition-all duration-600 ease-in-out text-white rounded-lg p-2 mb-10"
         >
           Load More Hotels
         </button>
-      )}
+      )}{" "}
+      <NotificationPopup
+        message="Hotel added to cart successfully!"
+        onClose={() => setShowNotification(false)}
+        show={showNotification}
+      />
     </div>
   );
 }

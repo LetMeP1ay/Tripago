@@ -31,6 +31,32 @@ const getPlaceId = async (hotelName, lat, lng) => {
   }
 };
 
+const getPlaceData = async (hotelName, lat, lng) => {
+  const textSearchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?location=${lat},${lng}&query=${hotelName}&radius=10&key=${process.env.PLACES_API_KEY}`;
+
+  try {
+    const response = await axios.get(textSearchUrl);
+    const result = response.data.results[0];
+
+    if (!result) {
+      throw new Error("Place not found.");
+    }
+
+    const placeId = result.place_id;
+    const photoReference = result.photos?.[0]?.photo_reference;
+    const photoWidth = result.photos?.[0]?.width;
+    const rating = result.rating;
+    const formattedAddress = result.formatted_address;
+
+    const streetAddress = formattedAddress.split(",")[0];
+
+    return { placeId, rating, photoReference, photoWidth, streetAddress };
+  } catch (error) {
+    console.error("Error fetching Place ID:", error.message);
+    throw error;
+  }
+};
+
 const getPhotoReferences = async (placeId) => {
   const placeDetailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${process.env.PLACES_API_KEY}`;
 
@@ -45,7 +71,7 @@ const getPhotoReferences = async (placeId) => {
   }
 };
 
-const getPhotoUrl = (photoReference, maxWidth = 400) => {
+const getPhotoUrl = (photoReference, maxWidth) => {
   return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidth}&photoreference=${photoReference}&key=${process.env.PLACES_API_KEY}`;
 };
 
@@ -63,7 +89,7 @@ app.get("/api/hotel-images", async (req, res) => {
         .json({ message: "No photos available for this hotel." });
     }
 
-    const photoUrls = photoReferences.map((ref) => getPhotoUrl(ref));
+    const photoUrls = photoReferences.map((ref) => getPhotoUrl(ref, 400));
 
     res.json({ photos: photoUrls });
   } catch (error) {
@@ -102,9 +128,6 @@ app.get("/api/food-info", async (req, res) => {
     for(i in photoReferences) {
       photoUrls.push(getPhotoUrl(photoReferences[i], photoWidths[i]));
     }
-    // add to array
-    console.log(photoUrls);
-
 
     if (foodInfo.length === 0) {
       return res.status(404).json({ message: "No Info for this place" });
@@ -116,9 +139,20 @@ app.get("/api/food-info", async (req, res) => {
   }
 });
 
-app.get("/api/food-info-test", async (req, res) => {
-  const data = req.query;
-  res.json(data);
+app.get("/api/hotel-data", async (req, res) => {
+  const { hotelName, lat, lng } = req.query;
+
+  try {
+    const { placeId, rating, photoReference, photoWidth, streetAddress } =
+      await getPlaceData(hotelName, lat, lng);
+
+    const photoUrl = getPhotoUrl(photoReference, photoWidth);
+
+    res.json({ placeId, photoUrl, rating, streetAddress });
+  } catch (error) {
+    console.error("Error fetching hotel images:", error.message);
+    res.status(500).json({ error: "Failed to fetch hotel data." });
+  }
 });
 
 const amadeusAuth = axios.create({
@@ -169,6 +203,34 @@ app.get("/api/airport-suggestions", async (req, res) => {
     res.json(response.data.data);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch airport suggestions" });
+  }
+});
+
+app.get("/api/hotel-suggestions", async (req, res) => {
+  try {
+    const token = await getAccessToken();
+
+    const { keyword, countryCode } = req.query;
+
+    if (!keyword || !countryCode) {
+      return res
+        .status(400)
+        .json({ error: "Missing keyword or cityCode parameter" });
+    }
+
+    const response = await amadeusApiV1.get(
+      `/reference-data/locations/hotel?keyword=${keyword}&subType=HOTEL_LEISURE&subType=HOTEL_GDS&countryCode=${countryCode}&max=5`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    res.json(response.data.data);
+  } catch (error) {
+    console.error("Error fetching hotel suggestions:", error.message);
+    res.status(500).json({ error: "Failed to fetch hotel suggestions" });
   }
 });
 
@@ -268,7 +330,7 @@ app.get("/api/hotel-offers", async (req, res) => {
       roomQuantity,
       priceRange,
       currency = "USD",
-      includeClosed = true,
+      includeClosed = false,
       bestRateOnly = true,
     } = req.query;
 
