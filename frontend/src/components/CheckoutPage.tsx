@@ -1,20 +1,40 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   useStripe,
   useElements,
   PaymentElement,
 } from "@stripe/react-stripe-js";
 import convertToSubcurrency from "@/../lib/convertToSubcurrency";
-
+import { CartContext } from "@/context/CartContext";
+import { NotificationContext } from "@/context/NotificationContext";
 
 const CheckoutPage = ({ amount }: { amount: number }) => {
   const stripe = useStripe();
+  const { clearCart } = useContext(CartContext);
+  const { addNotification } = useContext(NotificationContext);
   const elements = useElements();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [clientSecret, setClientSecret] = useState("");
   const [loading, setLoading] = useState(false);
+  const [currentDate, setCurrentDate] = useState<string>(getDate());
+  const [currentTime, setCurrentTime] = useState<string>(getTime());
+
+  function getDate() {
+    const today = new Date();
+    const month = today.getMonth() + 1;
+    const year = today.getFullYear();
+    const date = today.getDate();
+    return `${date}/${month}/${year}`;
+  }
+
+  function getTime() {
+    const time = new Date();
+    const hours = time.getHours();
+    const minutes = time.getMinutes();
+    return `${hours}:${minutes < 10 ? "0" + minutes : minutes}`;
+  }
 
   useEffect(() => {
     fetch("/api/create-payment-intent", {
@@ -52,8 +72,6 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
       },
     });
 
-
-
     if (error) {
       setErrorMessage(error.message);
     } else {
@@ -85,6 +103,12 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
       <button
         disabled={!stripe || loading}
         className="text-white w-full p-5 bg-black mt-2 rounded-md font-bold disabled:opacity-50 disabled:animate-pulse"
+        onClick={async () => {
+          clearCart();
+          addNotification(
+            `Receipt for $${amount} on ${currentDate} at ${currentTime}`
+          );
+        }}
       >
         {!loading ? `Pay $${amount}` : "Processing..."}
       </button>

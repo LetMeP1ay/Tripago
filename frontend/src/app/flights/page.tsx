@@ -110,8 +110,12 @@ export default function FlightSearch() {
       queryParams.checkOutDate = returnDate;
     }
 
-    const queryString = new URLSearchParams(queryParams).toString();
-    router.push(`/hotels?${queryString}`);
+    if (!user) {
+      return;
+    } else {
+      const queryString = new URLSearchParams(queryParams).toString();
+      router.push(`/hotels?${queryString}`);
+    }
   };
 
   const sortedResults = results?.data

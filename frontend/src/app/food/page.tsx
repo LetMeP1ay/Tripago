@@ -61,8 +61,6 @@ export default function FindFood() {
     getLocation();
   }, []);
 
-  console.log(latitude, longitude);
-
   const fetchFoodByLocation = async () => {
     setLoading(true);
     try {
