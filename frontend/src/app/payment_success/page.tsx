@@ -1,36 +1,49 @@
-'use client'
+"use client";
 
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from "react";
 import Image from "next/image";
-import { NotificationContext } from '@/components/NotificationContext';
+import { NotificationContext } from "@/context/NotificationContext";
 
 export default function PaymentSuccess({
   searchParams: { amount },
 }: {
   searchParams: { amount: string };
 }) {
+  const { addNotification } = useContext(NotificationContext);
   const [currentDate, setCurrentDate] = useState(getDate());
   const [currentTime, setCurrentTime] = useState(getTime());
-  const { addNotification } = useContext(NotificationContext);
-
-  useEffect(() => {
-    addNotification(`Receipt for $${amount} on ${currentDate} ${currentTime}`);
-  }, []);
 
   return (
     <div>
-      <div className="text-black text-center p-5 text-4xl font-bold">Payment Status</div>
+      <div className="text-black text-center p-5 text-4xl font-bold">
+        Payment Status
+      </div>
       <div className="max-w-6xl mx-auto p-10 text-white text-center border m-10 rounded-md bg-blue-500">
         <h1 className="text-4xl font-extrabold mb-2">Thank you!</h1>
         <div className="flex justify-center items-center">
-          <Image src="ic-success.svg" alt="tick" width={200} height={200}></Image>
+          <Image
+            src="/ic-success.svg"
+            alt="Success Tick"
+            width={200}
+            height={200}
+          />
         </div>
         <h2 className="text-2xl font-bold mb-2">Payment Success</h2>
-        <p className="text-xl font-bold mb-2">{currentDate} {currentTime}</p>
+        <p className="text-xl font-bold mb-2">
+          {currentDate} at {currentTime}
+        </p>
         <div className="bg-white p-2 rounded-md text-black mt-5 text-4xl font-bold">
           ${amount}
         </div>
-        <button onClick={() => { window.location.href = url; }} className="text-white w-full p-5 bg-black mt-2 rounded-md font-bold disabled:opacity-50 disabled:animate-pulse">
+        <button
+          onClick={() => {
+            window.location.href = url;
+            addNotification(
+              `Receipt for $${amount} on ${currentDate} at ${currentTime}`
+            );
+          }}
+          className="text-white w-full p-5 bg-black mt-2 rounded-md font-bold disabled:opacity-50 disabled:animate-pulse"
+        >
           Return Home
         </button>
       </div>
@@ -38,7 +51,7 @@ export default function PaymentSuccess({
   );
 }
 
-let url = `http://localhost:3000`
+const url = `http://localhost:3000`;
 
 function getDate() {
   const today = new Date();
@@ -52,5 +65,5 @@ function getTime() {
   const time = new Date();
   const hours = time.getHours();
   const minutes = time.getMinutes();
-  return `${hours}:${minutes}`
+  return `${hours}:${minutes < 10 ? "0" + minutes : minutes}`;
 }

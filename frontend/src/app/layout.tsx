@@ -5,8 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
-import { NotificationProvider } from "@/components/NotificationContext";
-
+import { NotificationProvider } from "@/context/NotificationContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,8 +25,8 @@ export default function RootLayout({
         <link rel="icon" href="Logo.svg" />
       </head>
       <AuthProvider>
-        <CartProvider>
-          <NotificationProvider>
+        <NotificationProvider>
+          <CartProvider>
             <body
               className={`${inter.className} flex flex-col min-h-screen bg-white text-black overflow-hidden`}
             >
@@ -35,8 +34,8 @@ export default function RootLayout({
               <main className="flex-grow">{children}</main>
               <Footer />
             </body>
-          </NotificationProvider>
-        </CartProvider>
+          </CartProvider>
+        </NotificationProvider>
       </AuthProvider>
     </html>
   );

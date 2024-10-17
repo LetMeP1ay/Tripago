@@ -6,8 +6,6 @@ import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import CheckoutPage from "@/components/CheckoutPage";
 import { CartContext } from "@/context/CartContext";
-import FlightDetails from "@/components/FlightDetails";
-import HotelCard from "@/components/HotelCard";
 import AirlineLogo from "@/components/AirlineLogo";
 
 if (process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY === undefined) {
@@ -35,7 +33,6 @@ export default function Stripe() {
         }
       } else if (item.type === "hotel" && item.hotel) {
         if (
-
           item.hotel.offer.offers &&
           item.hotel.offer.offers.length > 0 &&
           item.hotel.offer.offers[0].price &&
@@ -74,20 +71,41 @@ export default function Stripe() {
               <span className="text-2xl font-bold">${totalPrice}</span>
             </div>
           </div>
-          <div className={`transition-all duration-500 ease-in-out overflow-hidden ${showDetails ? 'overflow-y-scroll max-h-96' : 'max-h-0'}`}>
+          <div
+            className={`transition-all duration-500 ease-in-out overflow-hidden ${
+              showDetails ? "overflow-y-scroll max-h-96" : "max-h-0"
+            }`}
+          >
             <div className="bg-white text-black mt-5 p-5 rounded-lg">
-              <h3 className="text-2xl font-bold mb-3 text-center border-b mb-6 pb-6">Order Details</h3>
+              <h3 className="text-2xl font-bold mb-3 text-center border-b mb-6 pb-6">
+                Order Details
+              </h3>
               <div className="list-disc list-inside">
                 {cartItems
                   .filter((item) => item.type === "flight")
                   .map((item) => (
                     <div
                       key={`${item.type}-${item.id}`}
-                      className="flex flex-col mb-4 pb-4 md:px-20 text-xl">
+                      className="flex flex-col mb-4 pb-4 md:px-20 text-xl"
+                    >
                       <li className="flex w-full justify-between">
                         <div className="flex items-center justify-center">
-                        <AirlineLogo airlineName={item.flight!.carriers[item.flight!.flightData.itineraries[0].segments[0].carrierCode]}/>
-                        <span className="ml-8">{toTitleCase(item.flight!.carriers[item.flight!.flightData.itineraries[0].segments[0].carrierCode])} </span>
+                          <AirlineLogo
+                            airlineName={
+                              item.flight!.carriers[
+                                item.flight!.flightData.itineraries[0]
+                                  .segments[0].carrierCode
+                              ]
+                            }
+                          />
+                          <span className="ml-8">
+                            {toTitleCase(
+                              item.flight!.carriers[
+                                item.flight!.flightData.itineraries[0]
+                                  .segments[0].carrierCode
+                              ]
+                            )}{" "}
+                          </span>
                         </div>
                         <span>${item.flight!.flightData.price.total}</span>
                       </li>
@@ -98,11 +116,14 @@ export default function Stripe() {
                   .map((item) => (
                     <div
                       key={`${item.type}-${item.id}`}
-                      className="flex flex-col mb-4 border-t pt-4 w-full md:px-20">
-                        
+                      className="flex flex-col mb-4 border-t pt-4 w-full md:px-20"
+                    >
                       <li className="flex justify-between w-full pb-8 text-xl">
-                        <span>{toTitleCase(item.hotel!.offer.hotel.name)} (Nights: 1)</span>
-                        <span>${item.hotel!.offer.offers[0].price.total}</span>
+                        <span>
+                          {toTitleCase(item.hotel!.offer.hotel.name)} (Nights:
+                          1)
+                        </span>
+                        <span>${item.hotel!.offer.offers![0].price.total}</span>
                       </li>
                     </div>
                   ))}

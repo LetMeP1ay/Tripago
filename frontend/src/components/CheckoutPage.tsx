@@ -1,16 +1,17 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   useStripe,
   useElements,
   PaymentElement,
 } from "@stripe/react-stripe-js";
 import convertToSubcurrency from "@/../lib/convertToSubcurrency";
-
+import { CartContext } from "@/context/CartContext";
 
 const CheckoutPage = ({ amount }: { amount: number }) => {
   const stripe = useStripe();
+  const { clearCart } = useContext(CartContext);
   const elements = useElements();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [clientSecret, setClientSecret] = useState("");
@@ -52,8 +53,6 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
       },
     });
 
-
-
     if (error) {
       setErrorMessage(error.message);
     } else {
@@ -85,6 +84,7 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
       <button
         disabled={!stripe || loading}
         className="text-white w-full p-5 bg-black mt-2 rounded-md font-bold disabled:opacity-50 disabled:animate-pulse"
+        onClick={() => clearCart()}
       >
         {!loading ? `Pay $${amount}` : "Processing..."}
       </button>
