@@ -260,12 +260,11 @@ export default function FindFood() {
         <div className="h-full">
           <div className="h-1/3 grid grid-cols-1 content-center">
             <button
-              className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] flex justify-center flex items-center gap-2.5 flex p-7"
+              className="bg-[#DADADA] hover:bg-[#CCCCCC] active:bg-[#BBB] rounded-[50px] flex justify-center items-center p-3 px-6 transition-all duration-600 ease-in-out"
               onClick={() => {
                 fetchFoodByLocation();
               }}
             >
-              {" "}
               Find Something to Eat!
             </button>
           </div>
