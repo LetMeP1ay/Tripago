@@ -136,7 +136,7 @@ export default function FindFood() {
   const numFeatured = 5;
   return (
     <div
-      className={`px-[${gap}] py-[${gap}] flex-col justify-start items-center gap-[${gap}] inline-flex w-screen bg-white text-black md:overflow-x-hidden`}
+      className={`px-[${gap}] py-[${gap}] flex-col justify-start items-center gap-[${gap}] inline-flex w-full bg-white text-black md:overflow-x-hidden`}
     >
       {finding && (
         <div className="text-center">
@@ -257,7 +257,7 @@ export default function FindFood() {
         {/*whole food card end*/}
       </div>
       {latitude && longitude && foodOffers.length === 0 && (
-        <div className="h-screen">
+        <div className="h-full">
           <div className="h-1/3 grid grid-cols-1 content-center">
             <button
               className="grow shrink basis-0 h-[33px] bg-[#ebebeb] rounded-[50px] flex justify-center flex items-center gap-2.5 flex p-7"
