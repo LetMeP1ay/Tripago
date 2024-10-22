@@ -1,5 +1,7 @@
 "use client";
 
+import { auth } from "firebase-config";
+import { signOut } from "firebase/auth";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
@@ -36,12 +38,15 @@ export default function Footer() {
           onClick={() => router.push("/")}
         />
         <Image
-          src={"Heart.svg"}
+          src={"Logout.svg"}
           alt="icon"
           height={0}
           width={0}
           className="w-6 h-6 md:w-8 md:h-8 hover:cursor-pointer"
-          onClick={() => router.push("/favorites")}
+          onClick={async () => {
+            router.push("/");
+            await signOut(auth);
+          }}
         />
         <Image
           src={"Cart.svg"}
@@ -65,7 +70,7 @@ export default function Footer() {
           height={0}
           width={0}
           className="w-6 h-6 md:w-8 md:h-8 hover:cursor-pointer"
-          onClick={() => router.push("/login")}
+          onClick={() => router.push("/signup")}
         />
       </div>
     </footer>
