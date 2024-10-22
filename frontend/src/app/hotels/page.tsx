@@ -453,7 +453,7 @@ export default function HotelBookings() {
               Loading...
             </span>
           </div>
-          <div className="mt-4">
+          <div className="mt-4 text-center">
             If you see this for too long, make sure that you have selected your
             flight ticket.
           </div>
