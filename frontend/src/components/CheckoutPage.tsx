@@ -7,12 +7,10 @@ import {
   PaymentElement,
 } from "@stripe/react-stripe-js";
 import convertToSubcurrency from "@/../lib/convertToSubcurrency";
-import { CartContext } from "@/context/CartContext";
 import { NotificationContext } from "@/context/NotificationContext";
 
 const CheckoutPage = ({ amount }: { amount: number }) => {
   const stripe = useStripe();
-  const { clearCart } = useContext(CartContext);
   const { addNotification } = useContext(NotificationContext);
   const elements = useElements();
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -95,24 +93,25 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-2 rounded-md">
-      {clientSecret && <PaymentElement />}
+    <>
+      <form onSubmit={handleSubmit} className="bg-white p-2 rounded-md">
+        {clientSecret && <PaymentElement />}
 
-      {errorMessage && <div>{errorMessage}</div>}
+        {errorMessage && <div>{errorMessage}</div>}
 
-      <button
-        disabled={!stripe || loading}
-        className="text-white w-full p-5 bg-black mt-2 rounded-md font-bold disabled:opacity-50 disabled:animate-pulse"
-        onClick={async () => {
-          clearCart();
-          addNotification(
-            `Receipt for $${amount} on ${currentDate} at ${currentTime}`
-          );
-        }}
-      >
-        {!loading ? `Pay $${amount}` : "Processing..."}
-      </button>
-    </form>
+        <button
+          disabled={!stripe || loading}
+          className="text-white w-full p-5 bg-black mt-2 rounded-md font-bold disabled:opacity-50 disabled:animate-pulse"
+          onClick={async () => {
+            addNotification(
+              `Receipt for $${amount} on ${currentDate} at ${currentTime}`
+            );
+          }}
+        >
+          {!loading ? `Pay $${amount}` : "Processing..."}
+        </button>
+      </form>
+    </>
   );
 };
 

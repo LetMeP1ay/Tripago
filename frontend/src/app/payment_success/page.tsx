@@ -2,6 +2,8 @@
 
 import React, { useState, useContext, useEffect } from "react";
 import Image from "next/image";
+import { NotificationContext } from "@/context/NotificationContext";
+import { CartContext } from "@/context/CartContext";
 
 export default function PaymentSuccess({
   searchParams: { amount },
@@ -10,6 +12,7 @@ export default function PaymentSuccess({
 }) {
   const [currentDate, setCurrentDate] = useState(getDate());
   const [currentTime, setCurrentTime] = useState(getTime());
+  const { clearCart } = useContext(CartContext);
 
   return (
     <div>
@@ -36,6 +39,7 @@ export default function PaymentSuccess({
         <button
           onClick={() => {
             window.location.href = url;
+            clearCart();
           }}
           className="text-white w-full p-5 bg-black mt-2 rounded-md font-bold disabled:opacity-50 disabled:animate-pulse"
         >
