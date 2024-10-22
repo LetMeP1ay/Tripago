@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install dependencies (backend)
+      - name: Install dependencies
         run: |
           npm install
 
@@ -37,6 +37,6 @@ jobs:
         run: |
           npm run build
 
-      - name: Run tests (backend)
+      - name: Run tests
         run: |
           npm test

@@ -444,11 +444,19 @@ export default function HotelBookings() {
       } bg-white text-black`}
     >
       {hotelOffers.length === 0 && (
-        <div>
-          <p className="mt-96 text-center text-3xl">
-            Please, select a flight ticket to view the hotels in the city you
-            wish to go to!
-          </p>
+        <div className="flex flex-col pt-96 items-center justify-center">
+          <div
+            className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-black"
+            role="status"
+          >
+            <span className="text-black !absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+              Loading...
+            </span>
+          </div>
+          <div className="mt-4">
+            If you see this for too long, make sure that you have selected your
+            flight ticket.
+          </div>
         </div>
       )}
       {hotelOffers.length > 0 && (
