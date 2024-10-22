@@ -378,7 +378,7 @@ app.get("/api/hotel-ratings", async (req, res) => {
     res.json(response.data);
   } catch (error) {
     console.error(
-      "Error fetching hotel ratings:",
+      'Error fetching hotel ratings:',
       error.response?.data || error.message
     );
     res.status(500).json({ error: "Failed to fetch hotel ratings" });

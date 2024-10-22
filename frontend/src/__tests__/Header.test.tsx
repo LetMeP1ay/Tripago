@@ -23,7 +23,7 @@ function resizeWindow(width: number) {
   window.dispatchEvent(new Event("resize"));
 }
 
-describe("Header Component", () => {
+describe('Header Component', () => {
   beforeEach(() => {
     (useRouter as jest.Mock).mockReturnValue({
       push: jest.fn(),
