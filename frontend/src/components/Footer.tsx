@@ -1,15 +1,17 @@
 "use client";
 
+import { AuthContext } from "@/context/AuthContext";
 import { auth } from "firebase-config";
 import { signOut } from "firebase/auth";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 
 export default function Footer() {
   const pathname = usePathname();
   const router = useRouter();
+  const { user } = useContext(AuthContext);
   const [activeButton, setActiveButton] = useState<string>("");
 
   useEffect(() => {
@@ -53,25 +55,28 @@ export default function Footer() {
           className="w-6 h-6 md:w-8 md:h-8 hover:cursor-pointer"
           onClick={() => router.push("/flights")}
         />
-        <Image
-          src={"User.svg"}
-          alt="icon"
-          height={0}
-          width={0}
-          className="w-6 h-6 md:w-8 md:h-8 hover:cursor-pointer"
-          onClick={() => router.push("/signup")}
-        />
-        <Image
-          src={"Logout.svg"}
-          alt="icon"
-          height={0}
-          width={0}
-          className="w-6 h-6 md:w-8 md:h-8 hover:cursor-pointer"
-          onClick={async () => {
-            router.push("/");
-            await signOut(auth);
-          }}
-        />
+        {user ? (
+          <Image
+            src={"Logout.svg"}
+            alt="icon"
+            height={0}
+            width={0}
+            className="w-6 h-6 md:w-8 md:h-8 hover:cursor-pointer"
+            onClick={async () => {
+              router.push("/");
+              await signOut(auth);
+            }}
+          />
+        ) : (
+          <Image
+            src={"User.svg"}
+            alt="icon"
+            height={0}
+            width={0}
+            className="w-6 h-6 md:w-8 md:h-8 hover:cursor-pointer"
+            onClick={() => router.push("/signup")}
+          />
+        )}
       </div>
     </footer>
   );
