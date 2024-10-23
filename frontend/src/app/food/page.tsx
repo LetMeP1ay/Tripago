@@ -47,6 +47,7 @@ export default function FindFood() {
           (position) => {
             setLatitude(position.coords.latitude);
             setLongitude(position.coords.longitude);
+            setFinding(false);
           },
           (error) => {
             if (error) {
@@ -57,7 +58,6 @@ export default function FindFood() {
         );
       }
     };
-    setFinding(false);
     getLocation();
   }, []);
 
@@ -131,12 +131,15 @@ export default function FindFood() {
       className={`flex-col justify-start items-center inline-flex w-full bg-white text-black md:overflow-x-hidden`}
     >
       {finding && (
-        <div className="text-center">
-          <p>Finding your location</p>
-          <p>
-            if this is taking a while make sure you have location enabled on
-            your device
-          </p>
+        <div className="flex flex-col pt-96 items-center justify-center">
+          <div
+            className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-black"
+            role="status"
+          >
+            <span className="text-black !absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+              Loading...
+            </span>
+          </div>
         </div>
       )}
       <div>
@@ -253,7 +256,7 @@ export default function FindFood() {
         <div className="h-full">
           <div className="h-1/3 grid grid-cols-1 content-center">
             <button
-              className="bg-[#DADADA] hover:bg-[#CCCCCC] active:bg-[#BBB] rounded-[50px] flex justify-center items-center p-3 px-6 transition-all duration-600 ease-in-out"
+              className="bg-[#DADADA] hover:bg-[#CCCCCC] active:bg-[#BBB] rounded-[50px] flex justify-center items-center p-3 px-6 transition-all duration-600 ease-in-out mt-96"
               onClick={() => {
                 fetchFoodByLocation();
               }}
